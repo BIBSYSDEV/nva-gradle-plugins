@@ -124,6 +124,14 @@ publishing {
     }
 }
 
+// Only publish the main artifact to Sonatype, not plugin marker publications
+// (markers use plugin IDs like "nva.configuration" as group, which isn't a registered namespace)
+tasks.withType<PublishToMavenRepository>().configureEach {
+    if (name.contains("PluginMarkerMaven") && name.contains("SonatypeRepository")) {
+        enabled = false
+    }
+}
+
 nexusPublishing {
     repositories {
         sonatype {
