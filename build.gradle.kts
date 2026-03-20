@@ -2,6 +2,8 @@ plugins {
     `kotlin-dsl`
     `maven-publish`
     signing
+    id("io.gitlab.arturbosch.detekt") version libs.versions.detekt
+    id("com.diffplug.spotless") version libs.versions.spotless
 }
 
 group = "com.github.bibsysdev"
@@ -13,18 +15,83 @@ repositories {
 }
 
 dependencies {
-    // Plugin dependencies - these become available to precompiled script plugins
-    implementation("com.diffplug.spotless:spotless-plugin-gradle:7.1.0")
-    implementation("net.ltgt.gradle:gradle-errorprone-plugin:4.1.0")
-    implementation("com.github.ben-manes:gradle-versions-plugin:0.53.0")
-    implementation("com.netflix.nebula:gradle-lint-plugin:20.5.6")
+    implementation(libs.spotless.plugin)
+    implementation(libs.errorprone.plugin)
+    implementation(libs.dependency.updates.plugin)
+    implementation(libs.nebula.lint.plugin)
+
+    testImplementation(platform(libs.junit.bom))
+    testImplementation("org.junit.jupiter:junit-jupiter")
+    testImplementation(kotlin("test"))
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 kotlin {
     jvmToolchain(21)
 }
 
-// Publishing configuration (to be expanded for Maven Central)
+// --- Functional tests ---
+
+val functionalTestSourceSet = sourceSets.create("functionalTest")
+
+gradlePlugin.testSourceSets.add(functionalTestSourceSet)
+
+configurations["functionalTestImplementation"].extendsFrom(configurations["testImplementation"])
+configurations["functionalTestRuntimeOnly"].extendsFrom(configurations["testRuntimeOnly"])
+
+val functionalTest by tasks.registering(Test::class) {
+    testClassesDirs = functionalTestSourceSet.output.classesDirs
+    classpath = functionalTestSourceSet.runtimeClasspath
+    useJUnitPlatform()
+}
+
+tasks.named("check") {
+    dependsOn(functionalTest)
+}
+
+detekt {
+    source.setFrom(
+        "src/main/kotlin",
+        "src/functionalTest/kotlin",
+    )
+    config.setFrom(files("detekt.yml"))
+    buildUponDefaultConfig = true
+}
+
+spotless {
+    kotlin {
+        target("src/**/*.kt")
+        ktlint()
+    }
+    kotlinGradle {
+        target("*.gradle.kts", "src/**/*.gradle.kts")
+        ktlint()
+    }
+    format("markdown") {
+        target("**/*.md")
+        prettier().config(mapOf("proseWrap" to "preserve"))
+        endWithNewline()
+    }
+    format("yaml") {
+        target("**/*.yaml", "**/*.yml")
+        prettier().config(mapOf("printWidth" to 120))
+        endWithNewline()
+    }
+    format("misc") {
+        target(".gitignore", ".gitattributes", ".editorconfig")
+        leadingTabsToSpaces(4)
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+}
+
+// --- Publishing ---
+
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
 publishing {
     publications {
         create<MavenPublication>("mavenJava") {
@@ -38,7 +105,7 @@ publishing {
                 licenses {
                     license {
                         name.set("MIT License")
-                        url.set("http://www.opensource.org/licenses/mit-license.php")
+                        url.set("https://www.opensource.org/licenses/mit-license.php")
                     }
                 }
 
@@ -58,4 +125,37 @@ publishing {
             }
         }
     }
+
+    repositories {
+        maven {
+            name = "OSSRH"
+            val isSnapshot = version.toString().endsWith("SNAPSHOT")
+            url =
+                if (isSnapshot) {
+                    uri("https://s01.oss.sonatype.org/content/repositories/snapshots/")
+                } else {
+                    uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
+                }
+            credentials {
+                username = providers.environmentVariable("OSSRH_USERNAME").orNull
+                    ?: providers.gradleProperty("ossrh.username").orNull
+                password = providers.environmentVariable("OSSRH_PASSWORD").orNull
+                    ?: providers.gradleProperty("ossrh.password").orNull
+            }
+        }
+    }
+}
+
+signing {
+    val signingKey = providers.environmentVariable("GPG_SIGNING_KEY").orNull
+    val signingPassword = providers.environmentVariable("GPG_SIGNING_PASSWORD").orNull
+
+    // Sign when GPG key is available (CI) or when explicitly publishing a release
+    isRequired = signingKey != null || !version.toString().endsWith("SNAPSHOT")
+
+    if (signingKey != null) {
+        useInMemoryPgpKeys(signingKey, signingPassword)
+    }
+
+    sign(publishing.publications["mavenJava"])
 }

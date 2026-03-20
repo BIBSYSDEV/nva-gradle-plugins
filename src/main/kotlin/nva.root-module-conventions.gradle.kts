@@ -1,6 +1,7 @@
 import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 import no.unit.nva.gradle.NvaConventionsExtension
 
+// Backtick syntax = Gradle core plugins, id("...") = community/custom plugins
 plugins {
     base
     `jacoco-report-aggregation`
@@ -71,9 +72,13 @@ tasks.register("showCoverageReport") {
 
     doLast {
         val reportDirPath = "reports/jacoco/testCodeCoverageReport/html"
-        val reportDir = layout.buildDirectory.dir(reportDirPath).get().asFile
+        val reportDir =
+            layout.buildDirectory
+                .dir(reportDirPath)
+                .get()
+                .asFile
         logger.quiet("Combined coverage report:")
-        logger.quiet("file://${reportDir}/index.html")
+        logger.quiet("file://$reportDir/index.html")
     }
 }
 
@@ -87,9 +92,10 @@ tasks.named("verifyCoverage") {
 }
 
 fun isNonStable(version: String): Boolean {
-    val stableKeyword = listOf("RELEASE", "FINAL", "GA").any {
-        version.uppercase().contains(it)
-    }
+    val stableKeyword =
+        listOf("RELEASE", "FINAL", "GA").any {
+            version.uppercase().contains(it)
+        }
     val stableVersionPattern = Regex("^[0-9,.v-]+(-r|-jre)?$")
     return !stableKeyword && !stableVersionPattern.matches(version)
 }

@@ -1,0 +1,10 @@
+build:
+  maxIssues: 0
+
+complexity:
+  LongMethod:
+    threshold: 60
+  LongParameterList:
+    functionThreshold: 6
+  TooManyFunctions:
+    active: false

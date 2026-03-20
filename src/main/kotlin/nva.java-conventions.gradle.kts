@@ -2,6 +2,7 @@ import net.ltgt.gradle.errorprone.errorprone
 import no.unit.nva.gradle.NvaConventionsExtension
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 
+// Backtick syntax = Gradle core plugins, id("...") = community/custom plugins
 plugins {
     `java-library`
     id("nva.configuration")
@@ -30,13 +31,16 @@ afterEvaluate {
 
     pmd {
         toolVersion = nva.pmdVersion.get()
-        ruleSetFiles = files(
-            resources.text.fromString(
-                this@afterEvaluate.javaClass.getResourceAsStream("/pmd-ruleset.xml")
-                    ?.reader()?.readText()
-                    ?: error("Could not load pmd-ruleset.xml from plugin resources")
+        ruleSetFiles =
+            files(
+                resources.text.fromString(
+                    NvaConventionsExtension::class.java
+                        .getResourceAsStream("/pmd-ruleset.xml")
+                        ?.reader()
+                        ?.readText()
+                        ?: error("Could not load pmd-ruleset.xml from plugin resources"),
+                ),
             )
-        )
         ruleSets = emptyList()
         isIgnoreFailures = nva.pmdIgnoreFailures.get()
     }

@@ -25,11 +25,15 @@ spotless {
         endWithNewline()
     }
 
-    groovyGradle {
-        target("**/*.gradle")
-        greclipse()
-        leadingTabsToSpaces(4)
-        trimTrailingWhitespace()
+    format("markdown") {
+        target("**/*.md")
+        prettier().config(mapOf("proseWrap" to "preserve"))
+        endWithNewline()
+    }
+
+    format("yaml") {
+        target("**/*.yaml", "**/*.yml")
+        prettier().config(mapOf("printWidth" to 120))
         endWithNewline()
     }
 
