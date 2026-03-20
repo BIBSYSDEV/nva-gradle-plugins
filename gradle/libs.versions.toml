@@ -5,6 +5,7 @@ dependency-updates = "0.53.0"
 nebula-lint = "21.1.3"
 junit-bom = "5.14.2"
 detekt = "1.23.8"
+nexus-publish = "2.0.0"
 
 [libraries]
 spotless-plugin = { module = "com.diffplug.spotless:spotless-plugin-gradle", version.ref = "spotless" }

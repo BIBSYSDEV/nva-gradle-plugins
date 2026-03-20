@@ -4,6 +4,7 @@ plugins {
     signing
     id("io.gitlab.arturbosch.detekt") version libs.versions.detekt
     id("com.diffplug.spotless") version libs.versions.spotless
+    id("io.github.gradle-nexus.publish-plugin") version libs.versions.nexus.publish
 }
 
 group = "com.github.bibsysdev"
@@ -125,23 +126,23 @@ publishing {
             }
         }
     }
+}
 
+nexusPublishing {
     repositories {
-        maven {
-            name = "OSSRH"
-            val isSnapshot = version.toString().endsWith("SNAPSHOT")
-            url =
-                if (isSnapshot) {
-                    uri("https://s01.oss.sonatype.org/content/repositories/snapshots/")
-                } else {
-                    uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
-                }
-            credentials {
-                username = providers.environmentVariable("OSSRH_USERNAME").orNull
-                    ?: providers.gradleProperty("ossrh.username").orNull
-                password = providers.environmentVariable("OSSRH_PASSWORD").orNull
-                    ?: providers.gradleProperty("ossrh.password").orNull
-            }
+        sonatype {
+            nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
+            snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
+            username.set(
+                providers.environmentVariable("OSSRH_USERNAME").orElse(
+                    providers.gradleProperty("ossrh.username"),
+                ),
+            )
+            password.set(
+                providers.environmentVariable("OSSRH_PASSWORD").orElse(
+                    providers.gradleProperty("ossrh.password"),
+                ),
+            )
         }
     }
 }
