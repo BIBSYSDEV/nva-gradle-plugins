@@ -148,8 +148,8 @@ nexusPublishing {
 }
 
 signing {
-    val signingKey = providers.environmentVariable("GPG_SIGNING_KEY").orNull
-    val signingPassword = providers.environmentVariable("GPG_SIGNING_PASSWORD").orNull
+    val signingKey = providers.environmentVariable("SIGNING_KEY").orNull
+    val signingPassword = providers.environmentVariable("SIGNING_PASSWORD").orNull
 
     // Sign when GPG key is available (CI) or when explicitly publishing a release
     isRequired = signingKey != null || !version.toString().endsWith("SNAPSHOT")
