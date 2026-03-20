@@ -94,35 +94,31 @@ java {
 }
 
 publishing {
-    publications {
-        create<MavenPublication>("mavenJava") {
-            from(components["java"])
+    publications.withType<MavenPublication>().configureEach {
+        pom {
+            name.set("NVA Gradle Plugins")
+            description.set("Shared Gradle convention plugins for NVA microservices")
+            url.set("https://github.com/BIBSYSDEV/nva-gradle-plugins")
 
-            pom {
-                name.set("NVA Gradle Plugins")
-                description.set("Shared Gradle convention plugins for NVA microservices")
-                url.set("https://github.com/BIBSYSDEV/nva-gradle-plugins")
-
-                licenses {
-                    license {
-                        name.set("MIT License")
-                        url.set("https://www.opensource.org/licenses/mit-license.php")
-                    }
+            licenses {
+                license {
+                    name.set("MIT License")
+                    url.set("https://www.opensource.org/licenses/mit-license.php")
                 }
+            }
 
-                developers {
-                    developer {
-                        name.set("NVA Team")
-                        organization.set("Sikt")
-                        organizationUrl.set("https://sikt.no/")
-                    }
+            developers {
+                developer {
+                    name.set("NVA Team")
+                    organization.set("Sikt")
+                    organizationUrl.set("https://sikt.no/")
                 }
+            }
 
-                scm {
-                    connection.set("scm:git:git://github.com/BIBSYSDEV/nva-gradle-plugins.git")
-                    developerConnection.set("scm:git:ssh://github.com/BIBSYSDEV/nva-gradle-plugins.git")
-                    url.set("https://github.com/BIBSYSDEV/nva-gradle-plugins/tree/main")
-                }
+            scm {
+                connection.set("scm:git:git://github.com/BIBSYSDEV/nva-gradle-plugins.git")
+                developerConnection.set("scm:git:ssh://github.com/BIBSYSDEV/nva-gradle-plugins.git")
+                url.set("https://github.com/BIBSYSDEV/nva-gradle-plugins/tree/main")
             }
         }
     }
@@ -151,12 +147,12 @@ signing {
     val signingKey = providers.environmentVariable("SIGNING_KEY").orNull
     val signingPassword = providers.environmentVariable("SIGNING_PASSWORD").orNull
 
-    // Sign when GPG key is available (CI) or when explicitly publishing a release
-    isRequired = signingKey != null || !version.toString().endsWith("SNAPSHOT")
+    // Only require signing when a GPG key is available (CI)
+    isRequired = signingKey != null
 
     if (signingKey != null) {
         useInMemoryPgpKeys(signingKey, signingPassword)
     }
 
-    sign(publishing.publications["mavenJava"])
+    sign(publishing.publications)
 }
