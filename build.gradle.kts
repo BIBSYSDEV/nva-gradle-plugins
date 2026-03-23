@@ -19,10 +19,10 @@ repositories {
 dependencies {
     implementation(libs.spotless.plugin)
     implementation(libs.errorprone.plugin)
-    implementation(libs.dependency.updates.plugin)
+    api(libs.dependency.updates.plugin)
 
     testImplementation(platform(libs.junit.bom))
-    testImplementation("org.junit.jupiter:junit-jupiter")
+    testImplementation("org.junit.jupiter:junit-jupiter-api")
     testImplementation(kotlin("test"))
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
@@ -38,6 +38,17 @@ tasks.named<Test>("test") {
 
 tasks.named("build") {
     dependsOn("spotlessApply")
+    dependsOn("buildHealth")
+}
+
+dependencyAnalysis {
+    issues {
+        all {
+            onAny {
+                severity("fail")
+            }
+        }
+    }
 }
 
 detekt {
