@@ -4,7 +4,9 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
 import java.io.File
+import kotlin.test.assertContains
 import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
 class NvaPluginsFunctionalTest {
@@ -32,6 +34,41 @@ class NvaPluginsFunctionalTest {
         File(projectDir, "build.gradle.kts").writeText(content)
     }
 
+    private fun writeSubmoduleJavaSourceAndTest(
+        sourceBody: String,
+        testBody: String,
+    ) {
+        val srcDir = File(projectDir, "sub/src/main/java/com/example")
+        srcDir.mkdirs()
+        File(srcDir, "Covered.java").writeText(
+            """
+            package com.example;
+
+            public class Covered {
+                $sourceBody
+            }
+            """.trimIndent(),
+        )
+
+        val testDir = File(projectDir, "sub/src/test/java/com/example")
+        testDir.mkdirs()
+        File(testDir, "CoveredTest.java").writeText(
+            """
+            package com.example;
+
+            import org.junit.jupiter.api.Test;
+            import static org.junit.jupiter.api.Assertions.assertEquals;
+
+            class CoveredTest {
+                @Test
+                void testCovered() {
+                    $testBody
+                }
+            }
+            """.trimIndent(),
+        )
+    }
+
     private fun writeHelloJavaSource() {
         val srcDir = File(projectDir, "src/main/java/com/example")
         srcDir.mkdirs()
@@ -44,6 +81,54 @@ class NvaPluginsFunctionalTest {
                     return "hello";
                 }
             }
+            """.trimIndent(),
+        )
+    }
+
+    private fun rootWithSubmoduleBuildFiles(submoduleExtraConfig: String = "") {
+        settingsFile.writeText(
+            """
+            rootProject.name = "test-root"
+            include("sub")
+            """.trimIndent(),
+        )
+
+        kotlinBuildFile(
+            """
+            plugins {
+                id("nva.root-module-conventions")
+            }
+
+            nva {
+                spotlessEnabled.set(false)
+                spotlessEnforced.set(false)
+            }
+            """.trimIndent(),
+        )
+
+        val subDir = File(projectDir, "sub")
+        subDir.mkdirs()
+        File(subDir, "build.gradle.kts").writeText(
+            """
+            plugins {
+                id("nva.java-conventions")
+            }
+
+            repositories {
+                mavenCentral()
+            }
+
+            nva {
+                spotlessEnabled.set(false)
+                spotlessEnforced.set(false)
+                pmdIgnoreFailures.set(true)
+            }
+
+            dependencies {
+                testImplementation("org.junit.jupiter:junit-jupiter:5.11.4")
+                testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+            }
+            $submoduleExtraConfig
             """.trimIndent(),
         )
     }
@@ -161,40 +246,7 @@ class NvaPluginsFunctionalTest {
 
     @Test
     fun rootModuleConventionsPluginRegistersVerifyCoverageTask() {
-        settingsFile.writeText(
-            """
-            rootProject.name = "test-root"
-            include("sub")
-            """.trimIndent(),
-        )
-
-        kotlinBuildFile(
-            """
-            plugins {
-                id("nva.root-module-conventions")
-            }
-
-            nva {
-                spotlessEnabled.set(false)
-                spotlessEnforced.set(false)
-            }
-            """.trimIndent(),
-        )
-
-        val subDir = File(projectDir, "sub")
-        subDir.mkdirs()
-        File(subDir, "build.gradle.kts").writeText(
-            """
-            plugins {
-                id("nva.java-conventions")
-            }
-
-            nva {
-                spotlessEnabled.set(false)
-                spotlessEnforced.set(false)
-            }
-            """.trimIndent(),
-        )
+        rootWithSubmoduleBuildFiles()
 
         val result = runner("tasks", "--group=test coverage").build()
 
@@ -248,6 +300,55 @@ class NvaPluginsFunctionalTest {
         val result = runner("pmdMain").build()
 
         assertEquals(TaskOutcome.SUCCESS, result.task(":pmdMain")?.outcome)
+    }
+
+    @Test
+    fun errorProneDetectsDeadException() {
+        javaConventionsBuildFile(
+            """
+            nva {
+                pmdIgnoreFailures.set(true)
+            }
+            """.trimIndent(),
+        )
+
+        val srcDir = File(projectDir, "src/main/java/com/example")
+        srcDir.mkdirs()
+        File(srcDir, "DeadExceptionExample.java").writeText(
+            """
+            package com.example;
+
+            public class DeadExceptionExample {
+                public void bad() {
+                    new RuntimeException("this is dead");
+                }
+            }
+            """.trimIndent(),
+        )
+
+        val result = runner("compileJava").build()
+
+        assertContains(result.output, "DeadException")
+    }
+
+    @Test
+    fun verifyCoverageFailsWhenCoverageIsInsufficient() {
+        rootWithSubmoduleBuildFiles()
+        writeSubmoduleJavaSourceAndTest(
+            sourceBody =
+                """
+                public String covered() { return "covered"; }
+                public String uncovered() { return "uncovered"; }
+                """.trimIndent(),
+            testBody =
+                """
+                assertEquals("covered", new Covered().covered());
+                """.trimIndent(),
+        )
+
+        val result = runner("verifyCoverage").buildAndFail()
+
+        assertNotEquals(TaskOutcome.SUCCESS, result.task(":verifyCoverage")?.outcome)
     }
 
     @Test
