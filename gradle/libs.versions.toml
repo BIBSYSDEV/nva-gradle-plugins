@@ -1,13 +1,13 @@
 [versions]
-spotless = "8.2.0"
-errorprone-plugin = "5.1.0"
 dependency-updates = "0.53.0"
-junit-bom = "5.14.2"
 detekt = "1.23.8"
+errorprone-plugin = "5.1.0"
+junit-bom = "5.14.2"
 nexus-publish = "2.0.0"
+spotless = "8.2.0"
 
 [libraries]
-spotless-plugin = { module = "com.diffplug.spotless:spotless-plugin-gradle", version.ref = "spotless" }
-errorprone-plugin = { module = "net.ltgt.gradle:gradle-errorprone-plugin", version.ref = "errorprone-plugin" }
 dependency-updates-plugin = { module = "com.github.ben-manes:gradle-versions-plugin", version.ref = "dependency-updates" }
+errorprone-plugin = { module = "net.ltgt.gradle:gradle-errorprone-plugin", version.ref = "errorprone-plugin" }
 junit-bom = { module = "org.junit:junit-bom", version.ref = "junit-bom" }
+spotless-plugin = { module = "com.diffplug.spotless:spotless-plugin-gradle", version.ref = "spotless" }
