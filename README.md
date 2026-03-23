@@ -119,7 +119,7 @@ subprojects {
 
 ```bash
 ./gradlew build                # Build, test, and run all checks
-./gradlew functionalTest       # Run plugin functional tests only
+./gradlew test                 # Run tests only
 ./gradlew publishToMavenLocal  # Publish to local Maven for testing
 ```
 

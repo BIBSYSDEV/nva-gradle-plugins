@@ -31,29 +31,14 @@ kotlin {
     jvmToolchain(21)
 }
 
-// --- Functional tests ---
-
-val functionalTestSourceSet = sourceSets.create("functionalTest")
-
-gradlePlugin.testSourceSets.add(functionalTestSourceSet)
-
-configurations["functionalTestImplementation"].extendsFrom(configurations["testImplementation"])
-configurations["functionalTestRuntimeOnly"].extendsFrom(configurations["testRuntimeOnly"])
-
-val functionalTest by tasks.registering(Test::class) {
-    testClassesDirs = functionalTestSourceSet.output.classesDirs
-    classpath = functionalTestSourceSet.runtimeClasspath
+tasks.named<Test>("test") {
     useJUnitPlatform()
-}
-
-tasks.named("check") {
-    dependsOn(functionalTest)
 }
 
 detekt {
     source.setFrom(
         "src/main/kotlin",
-        "src/functionalTest/kotlin",
+        "src/test/kotlin",
     )
     config.setFrom(files("detekt.yml"))
     buildUponDefaultConfig = true
