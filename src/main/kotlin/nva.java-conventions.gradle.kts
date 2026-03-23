@@ -69,15 +69,7 @@ afterEvaluate {
             if (nva.pmdRulesetFile.isPresent) {
                 files(nva.pmdRulesetFile)
             } else {
-                files(
-                    resources.text.fromString(
-                        NvaConventionsExtension::class.java
-                            .getResourceAsStream("/pmd-ruleset.xml")
-                            ?.reader()
-                            ?.readText()
-                            ?: error("Could not load pmd-ruleset.xml from plugin resources"),
-                    ),
-                )
+                files(resources.text.fromString(NvaConventionsExtension.loadBundledResource("/pmd-ruleset.xml")))
             }
     }
 }

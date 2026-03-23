@@ -71,5 +71,12 @@ abstract class NvaConventionsExtension {
         val JACOCO_VERSION: String = props.getProperty("jacoco.version")
         val ERRORPRONE_CORE_VERSION: String = props.getProperty("errorprone.core.version")
         val SPECTRAL_VERSION: String = props.getProperty("spectral.version")
+
+        fun loadBundledResource(path: String): String =
+            NvaConventionsExtension::class.java
+                .getResourceAsStream(path)
+                ?.reader()
+                ?.readText()
+                ?: error("Could not load $path from plugin resources")
     }
 }

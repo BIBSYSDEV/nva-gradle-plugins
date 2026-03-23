@@ -17,15 +17,14 @@ repositories {
 }
 
 dependencies {
-    api(libs.dependency.updates.plugin)
     implementation(libs.dependency.analysis.plugin)
+    implementation(libs.dependency.updates.plugin)
+    implementation(libs.errorprone.plugin)
     implementation(libs.spectral.plugin)
     implementation(libs.spotless.plugin)
-    implementation(libs.errorprone.plugin)
-
-    testImplementation(platform(libs.junit.bom))
     testImplementation("org.junit.jupiter:junit-jupiter-api")
     testImplementation(kotlin("test"))
+    testImplementation(platform(libs.junit.bom))
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
