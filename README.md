@@ -73,7 +73,3 @@ nva {
 ./gradlew functionalTest       # Run plugin functional tests only
 ./gradlew publishToMavenLocal  # Publish to local Maven for testing
 ```
-
-## License
-
-MIT
