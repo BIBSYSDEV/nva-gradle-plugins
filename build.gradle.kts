@@ -5,6 +5,7 @@ plugins {
     id("io.gitlab.arturbosch.detekt") version libs.versions.detekt
     id("com.diffplug.spotless") version libs.versions.spotless
     id("io.github.gradle-nexus.publish-plugin") version libs.versions.nexus.publish
+    id("com.autonomousapps.dependency-analysis") version libs.versions.dependency.analysis
 }
 
 group = "com.github.bibsysdev"

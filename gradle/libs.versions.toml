@@ -1,4 +1,5 @@
 [versions]
+dependency-analysis = "3.6.1"
 dependency-updates = "0.53.0"
 detekt = "1.23.8"
 errorprone-plugin = "5.1.0"
