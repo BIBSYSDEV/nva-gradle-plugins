@@ -1,93 +1,56 @@
 # Publishing & Usage Guide
 
-## Prerequisites
+## Publishing a release
 
-The `com.github.bibsysdev` group ID must be registered on Sonatype OSSRH (already done for nva-commons).
-
-### GitHub repository secrets
-
-Configure these in the repo's Settings > Secrets and variables > Actions:
-
-| Secret                 | Description                               |
-| ---------------------- | ----------------------------------------- |
-| `OSSRH_USERNAME`       | Sonatype OSSRH / Nexus username           |
-| `OSSRH_PASSWORD`       | Sonatype OSSRH / Nexus password           |
-| `GPG_SIGNING_KEY`      | ASCII-armored GPG private key for signing |
-| `GPG_SIGNING_PASSWORD` | Passphrase for the GPG key                |
-
-To export your GPG key for the secret:
-
-```bash
-gpg --armor --export-secret-keys YOUR_KEY_ID
-```
-
-## Publishing
-
-### Automatic (via GitHub release)
-
-1. Update `version` in `build.gradle.kts` (remove `-SNAPSHOT`)
-2. Commit and push
+1. Update `version` in `build.gradle.kts`
+2. Commit and push to main
 3. Create a GitHub release:
    ```bash
-   gh release create v1.0.0 --title "v1.0.0" --notes "Initial release"
+   gh release create v1.0.1 --title "v1.0.1" --notes "Description of changes" --target main
    ```
-4. The `publish.yml` workflow builds, tests, signs, and publishes to Maven Central staging
-5. Log into https://s01.oss.sonatype.org, find the staging repository, **Close** and then **Release** it
+4. The `publish.yml` workflow builds, tests, signs, and publishes to Maven Central automatically
+5. Artifacts appear on Maven Central within ~10-30 minutes
 
-### Manual
+## Testing locally
+
+Publish to your local Maven repository:
 
 ```bash
-OSSRH_USERNAME=your-user OSSRH_PASSWORD=your-pass \
-GPG_SIGNING_KEY="$(gpg --armor --export-secret-keys YOUR_KEY_ID)" \
-GPG_SIGNING_PASSWORD=your-passphrase \
-./gradlew publish
+./gradlew publishToMavenLocal
 ```
 
-### Snapshots
-
-Snapshot versions (ending in `-SNAPSHOT`) are published to the OSSRH snapshots repository and do not require staging/release.
-
-## Consuming in another repo
-
-No authentication required — Maven Central is public.
-
-### settings.gradle
+Then in the consuming project's `settings.gradle`, add `mavenLocal()` to the plugin repositories:
 
 ```groovy
 pluginManagement {
     repositories {
+        mavenLocal()
         mavenCentral()
         gradlePluginPortal()
+    }
+    resolutionStrategy {
+        eachPlugin {
+            if (requested.id.id.startsWith('nva.')) {
+                useModule("com.github.bibsysdev:nva-gradle-plugins:${requested.version}")
+            }
+        }
     }
 }
 ```
 
-### build.gradle (root project)
+If the consuming project has a `build-logic` module, also add `mavenLocal()` to its `repositories` block.
 
-```groovy
-plugins {
-    id 'nva.root-module-conventions' version '1.0.0'
-}
-```
+Remember to remove `mavenLocal()` before committing.
 
-### build.gradle (each submodule)
+## GitHub repository secrets
 
-```groovy
-plugins {
-    id 'nva.java-conventions' version '1.0.0'
-}
+These are already configured. If they need to be rotated:
 
-repositories {
-    mavenCentral()
-}
+| Secret             | Description                               |
+| ------------------ | ----------------------------------------- |
+| `OSSRH_USERNAME`   | Sonatype Central user token username      |
+| `OSSRH_PASSWORD`   | Sonatype Central user token password      |
+| `SIGNING_KEY`      | ASCII-armored GPG private key for signing |
+| `SIGNING_PASSWORD` | Passphrase for the GPG key                |
 
-dependencies {
-    errorprone 'com.google.errorprone:error_prone_core:2.36.0'
-}
-```
-
-## Notes
-
-- The `errorprone` dependency must be declared by consuming projects
-- Nebula lint (`nva.gradlelint` / `nva.root-module-conventions`) only works with Groovy build scripts
-- After publishing a release, it takes ~10-30 minutes for artifacts to appear on Maven Central
+When pasting the GPG key, ensure there is a trailing newline after `-----END PGP PRIVATE KEY BLOCK-----`.
