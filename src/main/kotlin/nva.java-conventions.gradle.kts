@@ -57,10 +57,6 @@ tasks.named<JacocoReport>("jacocoTestReport") {
     }
 }
 
-tasks.named("check") {
-    dependsOn(tasks.named("test"))
-}
-
 // Defer consumer-configurable values so they can be set after plugin application
 afterEvaluate {
     pmd {
