@@ -7,6 +7,7 @@ plugins {
     `jacoco-report-aggregation`
     id("com.autonomousapps.dependency-analysis")
     id("com.github.ben-manes.versions")
+    id("io.github.michael-nestler.spectral")
     id("nva.configuration")
     id("nva.formatting-conventions")
 }
@@ -55,6 +56,37 @@ afterEvaluate {
                     exclude("org.apache.logging.log4j:log4j-core")
                 }
             }
+        }
+    }
+
+    if (nva.spectralDocuments.isPresent && nva.spectralDocuments.get().isNotEmpty()) {
+        val spectralExt =
+            extensions.getByType(io.github.michaelnestler.spectral.gradle.SpectralExtension::class.java)
+        spectralExt.version.set(NvaConventionsExtension.SPECTRAL_VERSION)
+        spectralExt.documents.from(nva.spectralDocuments.get().map { fileTree(".").matching { include(it) } })
+        val rulesetFile =
+            if (nva.spectralRulesetFile.isPresent) {
+                nva.spectralRulesetFile.get().asFile
+            } else {
+                val content =
+                    NvaConventionsExtension::class.java
+                        .getResourceAsStream("/spectral-ruleset.yaml")
+                        ?.reader()
+                        ?.readText()
+                        ?: error("Could not load spectral-ruleset.yaml from plugin resources")
+                val tempFile =
+                    layout.buildDirectory
+                        .file("spectral-ruleset.yaml")
+                        .get()
+                        .asFile
+                tempFile.parentFile.mkdirs()
+                tempFile.writeText(content)
+                tempFile
+            }
+        spectralExt.ruleset.set(rulesetFile)
+
+        tasks.named("check") {
+            dependsOn(tasks.named("spectral"))
         }
     }
 

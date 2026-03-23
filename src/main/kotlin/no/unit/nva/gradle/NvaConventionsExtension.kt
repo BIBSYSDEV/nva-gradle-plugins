@@ -1,6 +1,7 @@
 package no.unit.nva.gradle
 
 import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import java.math.BigDecimal
 import java.util.Properties
@@ -35,6 +36,12 @@ abstract class NvaConventionsExtension {
     /** Fail the build on dependency analysis issues (buildHealth). Default: false */
     abstract val dependencyAnalysisEnforced: Property<Boolean>
 
+    /** Glob patterns for OpenAPI documents to lint with Spectral. Spectral is only active when set. */
+    abstract val spectralDocuments: ListProperty<String>
+
+    /** Custom Spectral ruleset file. When set, overrides the bundled ruleset. */
+    abstract val spectralRulesetFile: RegularFileProperty
+
     /** Minimum method coverage ratio for JaCoCo verification (0.0 to 1.0). Default: 1.0 */
     abstract val jacocoMinMethodCoverage: Property<BigDecimal>
 
@@ -63,5 +70,6 @@ abstract class NvaConventionsExtension {
         val PMD_VERSION: String = props.getProperty("pmd.version")
         val JACOCO_VERSION: String = props.getProperty("jacoco.version")
         val ERRORPRONE_CORE_VERSION: String = props.getProperty("errorprone.core.version")
+        val SPECTRAL_VERSION: String = props.getProperty("spectral.version")
     }
 }

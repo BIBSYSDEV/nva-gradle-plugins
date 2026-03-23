@@ -79,7 +79,7 @@ plugins {
 | Plugin ID                     | Apply to     | Description                                                      |
 | ----------------------------- | ------------ | ---------------------------------------------------------------- |
 | `nva.configuration`           | any          | Creates the `nva {}` extension. Applied automatically by others. |
-| `nva.java-conventions`        | submodules   | Java 21, Error Prone, PMD, JaCoCo, Spotless, JUnit 5             |
+| `nva.java-conventions`        | submodules   | Java 21, Error Prone, PMD, JaCoCo, Spotless, Spectral, JUnit 5   |
 | `nva.formatting-conventions`  | any          | Spotless: Google Java Format, Groovy Gradle, Markdown, YAML      |
 | `nva.root-module-conventions` | root project | Aggregated JaCoCo coverage, dependency updates                   |
 
@@ -95,6 +95,8 @@ nva {
     pmdIgnoreFailures = false                        // Allow PMD violations without failing
     pmdRulesetFile = rootProject.file('pmd.xml')    // Custom PMD ruleset (default: bundled)
     dependencyAnalysisEnforced = false                // Fail build on dependency analysis issues
+    spectralDocuments = ['docs/*.yaml']               // OpenAPI docs to lint (Spectral only active when set)
+    spectralRulesetFile = file('.spectral.yaml')     // Custom Spectral ruleset (default: bundled)
     jacocoMinMethodCoverage = 1.000                  // Minimum method coverage ratio (0.0-1.0)
     jacocoMinClassCoverage = 1.000                   // Minimum class coverage ratio (0.0-1.0)
 }

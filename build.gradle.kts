@@ -19,6 +19,7 @@ repositories {
 dependencies {
     api(libs.dependency.updates.plugin)
     implementation(libs.dependency.analysis.plugin)
+    implementation(libs.spectral.plugin)
     implementation(libs.spotless.plugin)
     implementation(libs.errorprone.plugin)
 
