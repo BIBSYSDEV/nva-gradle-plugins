@@ -29,6 +29,7 @@ reporting {
     }
 }
 
+val nva = extensions.getByType<NvaConventionsExtension>()
 val testCodeCoverageReportTask = tasks.named<JacocoReport>("testCodeCoverageReport")
 
 tasks.register<JacocoCoverageVerification>("verifyCoverage") {
@@ -39,21 +40,25 @@ tasks.register<JacocoCoverageVerification>("verifyCoverage") {
     executionData.setFrom(testCodeCoverageReportTask.get().executionData)
     sourceDirectories.setFrom(testCodeCoverageReportTask.get().sourceDirectories)
     classDirectories.setFrom(testCodeCoverageReportTask.get().classDirectories)
+}
 
-    violationRules {
-        rule {
-            limit {
-                counter = "METHOD"
-                value = "COVEREDRATIO"
-                minimum = "1.000".toBigDecimal()
+afterEvaluate {
+    tasks.named<JacocoCoverageVerification>("verifyCoverage") {
+        violationRules {
+            rule {
+                limit {
+                    counter = "METHOD"
+                    value = "COVEREDRATIO"
+                    minimum = nva.jacocoMinMethodCoverage.get()
+                }
             }
-        }
 
-        rule {
-            limit {
-                counter = "CLASS"
-                value = "COVEREDRATIO"
-                minimum = "1.000".toBigDecimal()
+            rule {
+                limit {
+                    counter = "CLASS"
+                    value = "COVEREDRATIO"
+                    minimum = nva.jacocoMinClassCoverage.get()
+                }
             }
         }
     }

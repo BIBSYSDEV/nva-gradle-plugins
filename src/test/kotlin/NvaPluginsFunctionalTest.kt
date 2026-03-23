@@ -85,7 +85,10 @@ class NvaPluginsFunctionalTest {
         )
     }
 
-    private fun rootWithSubmoduleBuildFiles(submoduleExtraConfig: String = "") {
+    private fun rootWithSubmoduleBuildFiles(
+        rootExtraConfig: String = "",
+        submoduleExtraConfig: String = "",
+    ) {
         settingsFile.writeText(
             """
             rootProject.name = "test-root"
@@ -99,10 +102,15 @@ class NvaPluginsFunctionalTest {
                 id("nva.root-module-conventions")
             }
 
+            repositories {
+                mavenCentral()
+            }
+
             nva {
                 spotlessEnabled.set(false)
                 spotlessEnforced.set(false)
             }
+            $rootExtraConfig
             """.trimIndent(),
         )
 
@@ -349,6 +357,34 @@ class NvaPluginsFunctionalTest {
         val result = runner("verifyCoverage").buildAndFail()
 
         assertNotEquals(TaskOutcome.SUCCESS, result.task(":verifyCoverage")?.outcome)
+    }
+
+    @Test
+    fun verifyCoveragePassesWithRelaxedThreshold() {
+        rootWithSubmoduleBuildFiles(
+            rootExtraConfig =
+                """
+                nva {
+                    jacocoMinMethodCoverage.set(java.math.BigDecimal("0.500"))
+                    jacocoMinClassCoverage.set(java.math.BigDecimal("0.500"))
+                }
+                """.trimIndent(),
+        )
+        writeSubmoduleJavaSourceAndTest(
+            sourceBody =
+                """
+                public String covered() { return "covered"; }
+                public String uncovered() { return "uncovered"; }
+                """.trimIndent(),
+            testBody =
+                """
+                assertEquals("covered", new Covered().covered());
+                """.trimIndent(),
+        )
+
+        val result = runner("verifyCoverage").build()
+
+        assertEquals(TaskOutcome.SUCCESS, result.task(":verifyCoverage")?.outcome)
     }
 
     @Test

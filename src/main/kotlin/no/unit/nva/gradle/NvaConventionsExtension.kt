@@ -2,6 +2,7 @@ package no.unit.nva.gradle
 
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
+import java.math.BigDecimal
 import java.util.Properties
 
 /**
@@ -28,10 +29,18 @@ abstract class NvaConventionsExtension {
     /** Custom PMD ruleset file. When set, overrides the bundled ruleset. */
     abstract val pmdRulesetFile: RegularFileProperty
 
+    /** Minimum method coverage ratio for JaCoCo verification (0.0 to 1.0). Default: 1.0 */
+    abstract val jacocoMinMethodCoverage: Property<BigDecimal>
+
+    /** Minimum class coverage ratio for JaCoCo verification (0.0 to 1.0). Default: 1.0 */
+    abstract val jacocoMinClassCoverage: Property<BigDecimal>
+
     init {
         spotlessEnabled.convention(true)
         spotlessEnforced.convention(true)
         pmdIgnoreFailures.convention(false)
+        jacocoMinMethodCoverage.convention(BigDecimal("1.000"))
+        jacocoMinClassCoverage.convention(BigDecimal("1.000"))
     }
 
     companion object {
