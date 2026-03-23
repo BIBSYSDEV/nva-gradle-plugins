@@ -32,12 +32,6 @@ class NvaPluginsFunctionalTest {
         File(projectDir, "build.gradle.kts").writeText(content)
     }
 
-    private fun groovyBuildFile(content: String) {
-        File(projectDir, "build.gradle").writeText(content)
-        check(settingsFile.delete()) { "Failed to delete settings file" }
-        File(projectDir, "settings.gradle").writeText("""rootProject.name = 'test-project'""")
-    }
-
     private fun writeHelloJavaSource() {
         val srcDir = File(projectDir, "src/main/java/com/example")
         srcDir.mkdirs()
@@ -167,22 +161,6 @@ class NvaPluginsFunctionalTest {
         val result = runner("tasks", "--group=verification").build()
 
         assertTrue(result.output.contains("spotless"))
-    }
-
-    @Test
-    fun gradlelintPluginAppliesNebulaLintRules() {
-        groovyBuildFile(
-            """
-            plugins {
-                id 'java-library'
-                id 'nva.gradlelint'
-            }
-            """.trimIndent(),
-        )
-
-        val result = runner("tasks", "--group=lint").build()
-
-        assertTrue(result.output.contains("lint"))
     }
 
     @Test

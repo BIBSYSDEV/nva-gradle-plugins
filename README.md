@@ -80,13 +80,12 @@ plugins {
 
 ## Plugins
 
-| Plugin ID                     | Apply to     | Description                                                         |
-| ----------------------------- | ------------ | ------------------------------------------------------------------- |
-| `nva.configuration`           | any          | Creates the `nva {}` extension. Applied automatically by others.    |
-| `nva.java-conventions`        | submodules   | Java 21, Error Prone, PMD, JaCoCo, Spotless, JUnit 5                |
-| `nva.formatting-conventions`  | any          | Spotless: Google Java Format, Groovy Gradle, Markdown, YAML         |
-| `nva.gradlelint`              | root project | Nebula lint for unused/malformed dependencies (Groovy scripts only) |
-| `nva.root-module-conventions` | root project | Aggregated JaCoCo coverage, dependency updates, lint                |
+| Plugin ID                     | Apply to     | Description                                                      |
+| ----------------------------- | ------------ | ---------------------------------------------------------------- |
+| `nva.configuration`           | any          | Creates the `nva {}` extension. Applied automatically by others. |
+| `nva.java-conventions`        | submodules   | Java 21, Error Prone, PMD, JaCoCo, Spotless, JUnit 5             |
+| `nva.formatting-conventions`  | any          | Spotless: Google Java Format, Groovy Gradle, Markdown, YAML      |
+| `nva.root-module-conventions` | root project | Aggregated JaCoCo coverage, dependency updates                   |
 
 ## Configuration
 

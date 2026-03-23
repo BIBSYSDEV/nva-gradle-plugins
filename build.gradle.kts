@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "com.github.bibsysdev"
-version = "1.0.0"
+version = "1.0.1"
 
 repositories {
     gradlePluginPortal()
@@ -19,7 +19,6 @@ dependencies {
     implementation(libs.spotless.plugin)
     implementation(libs.errorprone.plugin)
     implementation(libs.dependency.updates.plugin)
-    implementation(libs.nebula.lint.plugin)
 
     testImplementation(platform(libs.junit.bom))
     testImplementation("org.junit.jupiter:junit-jupiter")

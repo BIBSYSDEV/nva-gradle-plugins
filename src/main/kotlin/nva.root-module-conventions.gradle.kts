@@ -7,7 +7,6 @@ plugins {
     `jacoco-report-aggregation`
     id("nva.configuration")
     id("nva.formatting-conventions")
-    id("nva.gradlelint")
     id("com.github.ben-manes.versions")
 }
 
