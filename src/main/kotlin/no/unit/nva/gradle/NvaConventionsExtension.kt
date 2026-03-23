@@ -1,5 +1,6 @@
 package no.unit.nva.gradle
 
+import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 
 /**
@@ -28,6 +29,9 @@ abstract class NvaConventionsExtension {
 
     /** Allow PMD to report violations without failing the build */
     abstract val pmdIgnoreFailures: Property<Boolean>
+
+    /** Custom PMD ruleset file. When set, overrides the bundled ruleset. */
+    abstract val pmdRulesetFile: RegularFileProperty
 
     init {
         pmdVersion.convention("7.15.0")
