@@ -70,15 +70,11 @@ tasks.register("showCoverageReport") {
     dependsOn(testCodeCoverageReportTask)
     outputs.upToDateWhen { false }
 
+    val reportDir = layout.buildDirectory.dir("reports/jacoco/testCodeCoverageReport/html")
+
     doLast {
-        val reportDirPath = "reports/jacoco/testCodeCoverageReport/html"
-        val reportDir =
-            layout.buildDirectory
-                .dir(reportDirPath)
-                .get()
-                .asFile
         logger.quiet("Combined coverage report:")
-        logger.quiet("file://$reportDir/index.html")
+        logger.quiet("file://${reportDir.get().asFile}/index.html")
     }
 }
 

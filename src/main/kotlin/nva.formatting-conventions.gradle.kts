@@ -7,8 +7,6 @@ plugins {
 }
 
 spotless {
-    isEnforceCheck = false
-
     // Java formatting only applies when java plugin is present
     plugins.withType<JavaPlugin> {
         java {
@@ -58,9 +56,7 @@ afterEvaluate {
         }
     }
 
-    if (nva.spotlessEnforced.get()) {
-        configure<SpotlessExtension> {
-            isEnforceCheck = true
-        }
+    configure<SpotlessExtension> {
+        isEnforceCheck = nva.spotlessEnforced.get()
     }
 }
