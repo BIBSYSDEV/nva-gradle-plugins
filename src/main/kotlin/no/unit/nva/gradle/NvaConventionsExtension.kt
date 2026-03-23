@@ -29,6 +29,9 @@ abstract class NvaConventionsExtension {
     /** Custom PMD ruleset file. When set, overrides the bundled ruleset. */
     abstract val pmdRulesetFile: RegularFileProperty
 
+    /** Treat all Error Prone errors as warnings instead of failing the build. Default: true */
+    abstract val errorproneAllErrorsAsWarnings: Property<Boolean>
+
     /** Minimum method coverage ratio for JaCoCo verification (0.0 to 1.0). Default: 1.0 */
     abstract val jacocoMinMethodCoverage: Property<BigDecimal>
 
@@ -39,6 +42,7 @@ abstract class NvaConventionsExtension {
         spotlessEnabled.convention(true)
         spotlessEnforced.convention(true)
         pmdIgnoreFailures.convention(false)
+        errorproneAllErrorsAsWarnings.convention(true)
         jacocoMinMethodCoverage.convention(BigDecimal("1.000"))
         jacocoMinClassCoverage.convention(BigDecimal("1.000"))
     }

@@ -5,11 +5,11 @@ import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 // Backtick syntax = Gradle core plugins, id("...") = community/custom plugins
 plugins {
     `java-library`
-    id("nva.configuration")
-    id("nva.formatting-conventions")
     jacoco
     pmd
     id("net.ltgt.errorprone")
+    id("nva.configuration")
+    id("nva.formatting-conventions")
 }
 
 val nva = extensions.getByType<NvaConventionsExtension>()
@@ -23,12 +23,6 @@ java {
 
 dependencies {
     "errorprone"("com.google.errorprone:error_prone_core:${NvaConventionsExtension.ERRORPRONE_CORE_VERSION}")
-}
-
-tasks.withType<JavaCompile>().configureEach {
-    options.errorprone {
-        allErrorsAsWarnings.set(true)
-    }
 }
 
 jacoco {
@@ -59,6 +53,12 @@ tasks.named<JacocoReport>("jacocoTestReport") {
 
 // Defer consumer-configurable values so they can be set after plugin application
 afterEvaluate {
+    tasks.withType<JavaCompile>().configureEach {
+        options.errorprone {
+            allErrorsAsWarnings.set(nva.errorproneAllErrorsAsWarnings.get())
+        }
+    }
+
     pmd {
         isIgnoreFailures = nva.pmdIgnoreFailures.get()
     }

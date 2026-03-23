@@ -91,6 +91,7 @@ All plugins read from the shared `nva {}` extension:
 nva {
     spotlessEnabled = true                           // Apply formatting before build/test
     spotlessEnforced = true                          // Fail build if formatting needed
+    errorproneAllErrorsAsWarnings = true               // Treat Error Prone errors as warnings
     pmdIgnoreFailures = false                        // Allow PMD violations without failing
     pmdRulesetFile = rootProject.file('pmd.xml')    // Custom PMD ruleset (default: bundled)
     jacocoMinMethodCoverage = 1.000                  // Minimum method coverage ratio (0.0-1.0)
