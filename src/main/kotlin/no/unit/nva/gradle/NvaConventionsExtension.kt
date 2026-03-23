@@ -30,12 +30,16 @@ abstract class NvaConventionsExtension {
     /** Allow PMD to report violations without failing the build */
     abstract val pmdIgnoreFailures: Property<Boolean>
 
+    /** Error Prone static analysis tool version */
+    abstract val errorProneCoreVersion: Property<String>
+
     /** Custom PMD ruleset file. When set, overrides the bundled ruleset. */
     abstract val pmdRulesetFile: RegularFileProperty
 
     init {
         pmdVersion.convention("7.15.0")
         jacocoVersion.convention("0.8.13")
+        errorProneCoreVersion.convention("2.36.0")
         spotlessEnabled.convention(true)
         spotlessEnforced.convention(true)
         pmdIgnoreFailures.convention(false)

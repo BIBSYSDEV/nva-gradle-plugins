@@ -12,6 +12,8 @@ plugins {
     id("net.ltgt.errorprone")
 }
 
+val nva = extensions.getByType<NvaConventionsExtension>()
+
 java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(21))
@@ -19,18 +21,26 @@ java {
     }
 }
 
+// Auto-configure Error Prone core dependency so consumers don't have to
+dependencies {
+    "errorprone"("com.google.errorprone:error_prone_core:${nva.errorProneCoreVersion.get()}")
+}
+
 tasks.withType<JavaCompile>().configureEach {
     options.errorprone {
-        // Suppress build failures from lint errors (remove this if possible)
         allErrorsAsWarnings.set(true)
     }
 }
 
-afterEvaluate {
-    val nva = extensions.getByType<NvaConventionsExtension>()
+pmd {
+    toolVersion = nva.pmdVersion.get()
+    ruleSets = emptyList()
+    isIgnoreFailures = nva.pmdIgnoreFailures.get()
+}
 
-    pmd {
-        toolVersion = nva.pmdVersion.get()
+// Defer PMD ruleset resolution so consumers can set pmdRulesetFile after plugin application
+afterEvaluate {
+    tasks.withType<Pmd>().configureEach {
         ruleSetFiles =
             if (nva.pmdRulesetFile.isPresent) {
                 files(nva.pmdRulesetFile)
@@ -45,8 +55,6 @@ afterEvaluate {
                     ),
                 )
             }
-        ruleSets = emptyList()
-        isIgnoreFailures = nva.pmdIgnoreFailures.get()
     }
 }
 

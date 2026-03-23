@@ -32,6 +32,11 @@ kotlin {
 
 tasks.named<Test>("test") {
     useJUnitPlatform()
+    dependsOn("spotlessApply")
+}
+
+tasks.named("build") {
+    dependsOn("spotlessApply")
 }
 
 detekt {

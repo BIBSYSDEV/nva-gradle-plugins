@@ -63,10 +63,6 @@ class NvaPluginsFunctionalTest {
                 spotlessEnabled.set(false)
                 spotlessEnforced.set(false)
             }
-
-            dependencies {
-                errorprone("com.google.errorprone:error_prone_core:2.36.0")
-            }
             $extraConfig
             """.trimIndent(),
         )
@@ -165,38 +161,37 @@ class NvaPluginsFunctionalTest {
 
     @Test
     fun rootModuleConventionsPluginRegistersVerifyCoverageTask() {
-        check(settingsFile.delete()) { "Failed to delete settings file" }
-        File(projectDir, "settings.gradle").writeText(
+        settingsFile.writeText(
             """
-            rootProject.name = 'test-root'
-            include 'sub'
+            rootProject.name = "test-root"
+            include("sub")
             """.trimIndent(),
         )
 
-        File(projectDir, "build.gradle").writeText(
+        kotlinBuildFile(
             """
             plugins {
-                id 'nva.root-module-conventions'
+                id("nva.root-module-conventions")
             }
 
             nva {
-                spotlessEnabled = false
-                spotlessEnforced = false
+                spotlessEnabled.set(false)
+                spotlessEnforced.set(false)
             }
             """.trimIndent(),
         )
 
         val subDir = File(projectDir, "sub")
         subDir.mkdirs()
-        File(subDir, "build.gradle").writeText(
+        File(subDir, "build.gradle.kts").writeText(
             """
             plugins {
-                id 'nva.java-conventions'
+                id("nva.java-conventions")
             }
 
             nva {
-                spotlessEnabled = false
-                spotlessEnforced = false
+                spotlessEnabled.set(false)
+                spotlessEnforced.set(false)
             }
             """.trimIndent(),
         )
@@ -205,6 +200,54 @@ class NvaPluginsFunctionalTest {
 
         assertTrue(result.output.contains("verifyCoverage"))
         assertTrue(result.output.contains("showCoverageReport"))
+    }
+
+    @Test
+    fun javaConventionsPluginUsesCustomPmdRuleset() {
+        // Minimal ruleset with NO rules — if the bundled ruleset is used instead,
+        // PMD will find violations and fail (since pmdIgnoreFailures is false)
+        val customRuleset = File(projectDir, "custom-pmd.xml")
+        customRuleset.writeText(
+            """
+            <?xml version="1.0"?>
+            <ruleset name="Empty"
+                     xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+                     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                     xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0
+                     https://pmd.sourceforge.io/ruleset_2_0_0.xsd">
+                <description>Empty ruleset to verify custom ruleset is applied</description>
+            </ruleset>
+            """.trimIndent(),
+        )
+
+        // Use code that would trigger bundled PMD rules (missing Javadoc, short variable name, etc.)
+        val srcDir = File(projectDir, "src/main/java/com/example")
+        srcDir.mkdirs()
+        File(srcDir, "Foo.java").writeText(
+            """
+            package com.example;
+
+            public class Foo {
+                public void x() {
+                    int a = 1;
+                    System.out.println(a);
+                }
+            }
+            """.trimIndent(),
+        )
+
+        javaConventionsBuildFile(
+            """
+            nva {
+                pmdRulesetFile.set(file("custom-pmd.xml"))
+            }
+            """.trimIndent(),
+        )
+
+        // Should pass with empty ruleset, would fail with bundled ruleset
+        val result = runner("pmdMain").build()
+
+        assertEquals(TaskOutcome.SUCCESS, result.task(":pmdMain")?.outcome)
     }
 
     @Test

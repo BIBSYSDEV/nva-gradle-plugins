@@ -10,6 +10,8 @@ plugins {
     id("com.github.ben-manes.versions")
 }
 
+val nva = extensions.getByType<NvaConventionsExtension>()
+
 // Automatically aggregate coverage from all subprojects
 dependencies {
     subprojects.forEach { subproject ->
@@ -17,11 +19,8 @@ dependencies {
     }
 }
 
-afterEvaluate {
-    val nva = extensions.getByType<NvaConventionsExtension>()
-    jacoco {
-        toolVersion = nva.jacocoVersion.get()
-    }
+jacoco {
+    toolVersion = nva.jacocoVersion.get()
 }
 
 reporting {

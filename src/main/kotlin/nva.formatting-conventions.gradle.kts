@@ -6,7 +6,11 @@ plugins {
     id("nva.configuration")
 }
 
+val nva = extensions.getByType<NvaConventionsExtension>()
+
 spotless {
+    isEnforceCheck = nva.spotlessEnforced.get()
+
     // Java formatting only applies when java plugin is present
     plugins.withType<JavaPlugin> {
         java {
@@ -43,20 +47,8 @@ spotless {
     }
 }
 
-afterEvaluate {
-    val nva = extensions.getByType<NvaConventionsExtension>()
-
-    if (nva.spotlessEnabled.get()) {
-        tasks.named("build") {
-            dependsOn("spotlessApply")
-        }
-
-        tasks.matching { it.name == "test" }.configureEach {
-            dependsOn("spotlessApply")
-        }
-    }
-
-    configure<SpotlessExtension> {
-        isEnforceCheck = nva.spotlessEnforced.get()
+if (nva.spotlessEnabled.get()) {
+    tasks.named("build") {
+        dependsOn("spotlessApply")
     }
 }
