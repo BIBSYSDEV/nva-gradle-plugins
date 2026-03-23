@@ -94,6 +94,7 @@ nva {
     errorproneAllErrorsAsWarnings = true               // Treat Error Prone errors as warnings
     pmdIgnoreFailures = false                        // Allow PMD violations without failing
     pmdRulesetFile = rootProject.file('pmd.xml')    // Custom PMD ruleset (default: bundled)
+    dependencyAnalysisEnforced = false                // Fail build on dependency analysis issues
     jacocoMinMethodCoverage = 1.000                  // Minimum method coverage ratio (0.0-1.0)
     jacocoMinClassCoverage = 1.000                   // Minimum class coverage ratio (0.0-1.0)
 }

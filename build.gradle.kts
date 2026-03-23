@@ -2,10 +2,10 @@ plugins {
     `kotlin-dsl`
     `maven-publish`
     signing
-    id("io.gitlab.arturbosch.detekt") version libs.versions.detekt
-    id("com.diffplug.spotless") version libs.versions.spotless
-    id("io.github.gradle-nexus.publish-plugin") version libs.versions.nexus.publish
     id("com.autonomousapps.dependency-analysis") version libs.versions.dependency.analysis
+    id("com.diffplug.spotless") version libs.versions.spotless
+    id("io.gitlab.arturbosch.detekt") version libs.versions.detekt
+    id("io.github.gradle-nexus.publish-plugin") version libs.versions.nexus.publish
 }
 
 group = "com.github.bibsysdev"
@@ -17,9 +17,10 @@ repositories {
 }
 
 dependencies {
+    api(libs.dependency.updates.plugin)
+    implementation(libs.dependency.analysis.plugin)
     implementation(libs.spotless.plugin)
     implementation(libs.errorprone.plugin)
-    api(libs.dependency.updates.plugin)
 
     testImplementation(platform(libs.junit.bom))
     testImplementation("org.junit.jupiter:junit-jupiter-api")

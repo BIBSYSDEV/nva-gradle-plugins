@@ -7,6 +7,7 @@ plugins {
     `java-library`
     jacoco
     pmd
+    id("com.autonomousapps.dependency-analysis")
     id("net.ltgt.errorprone")
     id("nva.configuration")
     id("nva.formatting-conventions")

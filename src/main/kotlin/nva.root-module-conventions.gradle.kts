@@ -5,9 +5,10 @@ import no.unit.nva.gradle.NvaConventionsExtension
 plugins {
     base
     `jacoco-report-aggregation`
+    id("com.autonomousapps.dependency-analysis")
+    id("com.github.ben-manes.versions")
     id("nva.configuration")
     id("nva.formatting-conventions")
-    id("com.github.ben-manes.versions")
 }
 
 // Automatically aggregate coverage from all subprojects
@@ -43,6 +44,26 @@ tasks.register<JacocoCoverageVerification>("verifyCoverage") {
 }
 
 afterEvaluate {
+    val severity = if (nva.dependencyAnalysisEnforced.get()) "fail" else "warn"
+    dependencyAnalysis {
+        issues {
+            all {
+                onAny {
+                    severity(severity)
+                }
+                onRuntimeOnly {
+                    exclude("org.apache.logging.log4j:log4j-core")
+                }
+            }
+        }
+    }
+
+    if (nva.dependencyAnalysisEnforced.get()) {
+        tasks.named("check") {
+            dependsOn(tasks.named("buildHealth"))
+        }
+    }
+
     tasks.named<JacocoCoverageVerification>("verifyCoverage") {
         violationRules {
             rule {

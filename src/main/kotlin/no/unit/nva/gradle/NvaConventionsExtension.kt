@@ -32,6 +32,9 @@ abstract class NvaConventionsExtension {
     /** Treat all Error Prone errors as warnings instead of failing the build. Default: true */
     abstract val errorproneAllErrorsAsWarnings: Property<Boolean>
 
+    /** Fail the build on dependency analysis issues (buildHealth). Default: false */
+    abstract val dependencyAnalysisEnforced: Property<Boolean>
+
     /** Minimum method coverage ratio for JaCoCo verification (0.0 to 1.0). Default: 1.0 */
     abstract val jacocoMinMethodCoverage: Property<BigDecimal>
 
@@ -43,6 +46,7 @@ abstract class NvaConventionsExtension {
         spotlessEnforced.convention(true)
         pmdIgnoreFailures.convention(false)
         errorproneAllErrorsAsWarnings.convention(true)
+        dependencyAnalysisEnforced.convention(false)
         jacocoMinMethodCoverage.convention(BigDecimal("1.000"))
         jacocoMinClassCoverage.convention(BigDecimal("1.000"))
     }
