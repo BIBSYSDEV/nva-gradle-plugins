@@ -49,10 +49,6 @@ plugins {
 repositories {
     mavenCentral()
 }
-
-dependencies {
-    errorprone 'com.google.errorprone:error_prone_core:2.36.0'
-}
 ```
 
 ### Usage from a build-logic module
@@ -93,8 +89,6 @@ All plugins read from the shared `nva {}` extension:
 
 ```groovy
 nva {
-    pmdVersion = '7.15.0'                           // PMD tool version
-    jacocoVersion = '0.8.13'                        // JaCoCo tool version
     spotlessEnabled = true                           // Apply formatting before build/test
     spotlessEnforced = true                          // Fail build if formatting needed
     pmdIgnoreFailures = false                        // Allow PMD violations without failing
