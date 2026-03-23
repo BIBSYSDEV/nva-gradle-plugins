@@ -9,8 +9,6 @@ plugins {
 val nva = extensions.getByType<NvaConventionsExtension>()
 
 spotless {
-    isEnforceCheck = nva.spotlessEnforced.get()
-
     // Java formatting only applies when java plugin is present
     plugins.withType<JavaPlugin> {
         java {
@@ -47,8 +45,15 @@ spotless {
     }
 }
 
-if (nva.spotlessEnabled.get()) {
-    tasks.named("build") {
-        dependsOn("spotlessApply")
+// Defer reading extension values so consumers can override them after plugin application
+afterEvaluate {
+    configure<SpotlessExtension> {
+        isEnforceCheck = nva.spotlessEnforced.get()
+    }
+
+    if (nva.spotlessEnabled.get()) {
+        tasks.withType<JavaCompile>().configureEach {
+            dependsOn("spotlessApply")
+        }
     }
 }

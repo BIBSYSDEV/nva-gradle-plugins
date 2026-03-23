@@ -21,9 +21,8 @@ java {
     }
 }
 
-// Auto-configure Error Prone core dependency so consumers don't have to
 dependencies {
-    "errorprone"("com.google.errorprone:error_prone_core:${nva.errorProneCoreVersion.get()}")
+    "errorprone"("com.google.errorprone:error_prone_core:${NvaConventionsExtension.ERRORPRONE_CORE_VERSION}")
 }
 
 tasks.withType<JavaCompile>().configureEach {
@@ -32,30 +31,13 @@ tasks.withType<JavaCompile>().configureEach {
     }
 }
 
-pmd {
-    toolVersion = nva.pmdVersion.get()
-    ruleSets = emptyList()
-    isIgnoreFailures = nva.pmdIgnoreFailures.get()
+jacoco {
+    toolVersion = NvaConventionsExtension.JACOCO_VERSION
 }
 
-// Defer PMD ruleset resolution so consumers can set pmdRulesetFile after plugin application
-afterEvaluate {
-    tasks.withType<Pmd>().configureEach {
-        ruleSetFiles =
-            if (nva.pmdRulesetFile.isPresent) {
-                files(nva.pmdRulesetFile)
-            } else {
-                files(
-                    resources.text.fromString(
-                        NvaConventionsExtension::class.java
-                            .getResourceAsStream("/pmd-ruleset.xml")
-                            ?.reader()
-                            ?.readText()
-                            ?: error("Could not load pmd-ruleset.xml from plugin resources"),
-                    ),
-                )
-            }
-    }
+pmd {
+    toolVersion = NvaConventionsExtension.PMD_VERSION
+    ruleSets = emptyList()
 }
 
 tasks.named<Test>("test") {
@@ -77,4 +59,28 @@ tasks.named<JacocoReport>("jacocoTestReport") {
 
 tasks.named("check") {
     dependsOn(tasks.named("test"))
+}
+
+// Defer consumer-configurable values so they can be set after plugin application
+afterEvaluate {
+    pmd {
+        isIgnoreFailures = nva.pmdIgnoreFailures.get()
+    }
+
+    tasks.withType<Pmd>().configureEach {
+        ruleSetFiles =
+            if (nva.pmdRulesetFile.isPresent) {
+                files(nva.pmdRulesetFile)
+            } else {
+                files(
+                    resources.text.fromString(
+                        NvaConventionsExtension::class.java
+                            .getResourceAsStream("/pmd-ruleset.xml")
+                            ?.reader()
+                            ?.readText()
+                            ?: error("Could not load pmd-ruleset.xml from plugin resources"),
+                    ),
+                )
+            }
+    }
 }

@@ -10,8 +10,6 @@ plugins {
     id("com.github.ben-manes.versions")
 }
 
-val nva = extensions.getByType<NvaConventionsExtension>()
-
 // Automatically aggregate coverage from all subprojects
 dependencies {
     subprojects.forEach { subproject ->
@@ -20,7 +18,7 @@ dependencies {
 }
 
 jacoco {
-    toolVersion = nva.jacocoVersion.get()
+    toolVersion = NvaConventionsExtension.JACOCO_VERSION
 }
 
 reporting {
@@ -38,7 +36,6 @@ tasks.register<JacocoCoverageVerification>("verifyCoverage") {
     description = "Verify test coverage"
     dependsOn(testCodeCoverageReportTask)
 
-    // Get data from the aggregated report task
     executionData.setFrom(testCodeCoverageReportTask.get().executionData)
     sourceDirectories.setFrom(testCodeCoverageReportTask.get().sourceDirectories)
     classDirectories.setFrom(testCodeCoverageReportTask.get().classDirectories)
@@ -100,7 +97,6 @@ tasks.named<DependencyUpdatesTask>("dependencyUpdates") {
     reportfileName = "report"
     gradleReleaseChannel = "current"
     rejectVersionIf {
-        // Don't suggest upgrading from a stable version to a non-stable version
         isNonStable(candidate.version) && !isNonStable(currentVersion)
     }
 }

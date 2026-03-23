@@ -211,9 +211,9 @@ class NvaPluginsFunctionalTest {
             """
             <?xml version="1.0"?>
             <ruleset name="Empty"
-                     xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+                     xmlns="https://pmd.sourceforge.net/ruleset/2.0.0"
                      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                     xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0
+                     xsi:schemaLocation="https://pmd.sourceforge.net/ruleset/2.0.0
                      https://pmd.sourceforge.io/ruleset_2_0_0.xsd">
                 <description>Empty ruleset to verify custom ruleset is applied</description>
             </ruleset>
@@ -261,8 +261,6 @@ class NvaPluginsFunctionalTest {
             tasks.register("printDefaults") {
                 doLast {
                     val nva = project.extensions.getByType(no.unit.nva.gradle.NvaConventionsExtension::class.java)
-                    println("pmdVersion=${nva.pmdVersion.get()}")
-                    println("jacocoVersion=${nva.jacocoVersion.get()}")
                     println("spotlessEnabled=${nva.spotlessEnabled.get()}")
                     println("spotlessEnforced=${nva.spotlessEnforced.get()}")
                     println("pmdIgnoreFailures=${nva.pmdIgnoreFailures.get()}")
@@ -273,8 +271,6 @@ class NvaPluginsFunctionalTest {
 
         val result = runner("printDefaults").build()
 
-        assertTrue(result.output.contains("pmdVersion=7.15.0"))
-        assertTrue(result.output.contains("jacocoVersion=0.8.13"))
         assertTrue(result.output.contains("spotlessEnabled=true"))
         assertTrue(result.output.contains("spotlessEnforced=true"))
         assertTrue(result.output.contains("pmdIgnoreFailures=false"))
