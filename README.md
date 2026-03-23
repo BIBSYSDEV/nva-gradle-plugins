@@ -2,6 +2,8 @@
 
 Shared Gradle convention plugins for [NVA](https://nva.sikt.no/) (Nasjonalt vitenarkiv) microservices. These precompiled script plugins replace copy-pasted build logic across NVA repositories.
 
+Published to Maven Central as `com.github.bibsysdev:nva-gradle-plugins`.
+
 ## Prerequisites
 
 - Java 21 (Amazon Corretto recommended)
@@ -9,36 +11,70 @@ Shared Gradle convention plugins for [NVA](https://nva.sikt.no/) (Nasjonalt vite
 
 ## Usage
 
-Add the plugin dependency to your root `build.gradle` (or `settings.gradle` plugin management):
+### settings.gradle
+
+Since the plugins are published as a library (not to the Gradle Plugin Portal), a `resolutionStrategy` is needed to map plugin IDs to the Maven artifact:
 
 ```groovy
-// settings.gradle
 pluginManagement {
     repositories {
-        maven {
-            url = uri("https://maven.pkg.github.com/BIBSYSDEV/nva-gradle-plugins")
-            credentials {
-                username = System.getenv("GITHUB_ACTOR")
-                password = System.getenv("GITHUB_TOKEN")
+        mavenCentral()
+        gradlePluginPortal()
+    }
+    resolutionStrategy {
+        eachPlugin {
+            if (requested.id.id.startsWith('nva.')) {
+                useModule("com.github.bibsysdev:nva-gradle-plugins:${requested.version}")
             }
         }
-        gradlePluginPortal()
-        mavenCentral()
     }
 }
 ```
 
+### build.gradle (root project)
+
 ```groovy
-// build.gradle (root project)
 plugins {
-    id 'nva.root-module-conventions'
+    id 'nva.root-module-conventions' version '1.0.1'
+}
+```
+
+### build.gradle (submodules)
+
+```groovy
+plugins {
+    id 'nva.java-conventions' version '1.0.1'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    errorprone 'com.google.errorprone:error_prone_core:2.36.0'
+}
+```
+
+### Usage from a build-logic module
+
+If your repo has a `build-logic` module with its own precompiled script plugins, declare the dependency there instead of using versions in plugin blocks:
+
+```groovy
+// build-logic/build.gradle
+repositories {
+    mavenCentral()
+    gradlePluginPortal()
+}
+
+dependencies {
+    implementation 'com.github.bibsysdev:nva-gradle-plugins:1.0.1'
 }
 ```
 
 ```groovy
-// build.gradle (submodules)
+// build-logic/src/main/groovy/myproject.java-conventions.gradle
 plugins {
-    id 'nva.java-conventions'
+    id 'nva.java-conventions'  // no version — resolved from build-logic dependency
 }
 ```
 
@@ -58,11 +94,24 @@ All plugins read from the shared `nva {}` extension:
 
 ```groovy
 nva {
-    pmdVersion = '7.15.0'           // PMD tool version
-    jacocoVersion = '0.8.13'        // JaCoCo tool version
-    spotlessEnabled = true           // Apply formatting before build/test
-    spotlessEnforced = true          // Fail build if formatting needed
-    pmdIgnoreFailures = false        // Allow PMD violations without failing
+    pmdVersion = '7.15.0'                           // PMD tool version
+    jacocoVersion = '0.8.13'                        // JaCoCo tool version
+    spotlessEnabled = true                           // Apply formatting before build/test
+    spotlessEnforced = true                          // Fail build if formatting needed
+    pmdIgnoreFailures = false                        // Allow PMD violations without failing
+    pmdRulesetFile = rootProject.file('pmd.xml')    // Custom PMD ruleset (default: bundled)
+}
+```
+
+To configure across all submodules from the root `build.gradle`:
+
+```groovy
+subprojects {
+    pluginManager.withPlugin('nva.java-conventions') {
+        nva {
+            pmdIgnoreFailures = true
+        }
+    }
 }
 ```
 
@@ -73,3 +122,5 @@ nva {
 ./gradlew functionalTest       # Run plugin functional tests only
 ./gradlew publishToMavenLocal  # Publish to local Maven for testing
 ```
+
+See [PUBLISHING.md](PUBLISHING.md) for release instructions.
