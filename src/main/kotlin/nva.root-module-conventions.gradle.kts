@@ -107,47 +107,41 @@ fun Project.configureDependencyAnalysis() {
 
 fun Project.configureSpectral() {
     val docs = nva.spectral.documents
-    val hasDocuments = docs.isPresent && docs.get().isNotEmpty()
-    if (hasDocuments) {
-        val spectral =
-            extensions.getByType(
-                io.github.michaelnestler.spectral.gradle.SpectralExtension::class.java,
-            )
-        spectral.version.set(NvaConventionsExtension.SPECTRAL_VERSION)
-        spectral.documents.from(docs.get().map { fileTree(".").matching { include(it) } })
-        spectral.ruleset.set(resolveSpectralRuleset())
+    if (!docs.isPresent || docs.get().isEmpty()) return
 
-        tasks.named("check") {
-            dependsOn(tasks.named("spectral"))
-        }
+    val spectral =
+        extensions.getByType(
+            io.github.michaelnestler.spectral.gradle.SpectralExtension::class.java,
+        )
+    spectral.version.set(NvaConventionsExtension.SPECTRAL_VERSION)
+    spectral.documents.from(docs.get().map { fileTree(".").matching { include(it) } })
+    spectral.ruleset.set(resolveSpectralRuleset())
+
+    tasks.named("check") {
+        dependsOn(tasks.named("spectral"))
     }
 }
 
 fun Project.resolveSpectralRuleset(): File {
-    val rulesetFile =
-        if (nva.spectral.rulesetFile.isPresent) {
-            nva.spectral.rulesetFile
-                .get()
-                .asFile
-        } else {
-            writeBundledResourceToFile("/spectral-ruleset.yaml", "spectral-ruleset.yaml")
-        }
-    return rulesetFile
-}
-
-fun Project.writeBundledResourceToFile(
-    resourcePath: String,
-    fileName: String,
-): File {
-    val content = NvaConventionsExtension.loadBundledResource(resourcePath)
-    val outputFile =
-        layout.buildDirectory
-            .file(fileName)
+    if (nva.spectral.rulesetFile.isPresent) {
+        return nva.spectral.rulesetFile
             .get()
             .asFile
-    outputFile.parentFile.mkdirs()
-    outputFile.writeText(content)
-    return outputFile
+    }
+    val bundledRuleset = layout.buildDirectory.file("spectral-ruleset.yaml")
+    val writeRuleset =
+        tasks.register("writeSpectralRuleset") {
+            outputs.file(bundledRuleset)
+            doLast {
+                bundledRuleset.get().asFile.writeText(
+                    NvaConventionsExtension.loadBundledResource("/spectral-ruleset.yaml"),
+                )
+            }
+        }
+    tasks.named("spectral") {
+        dependsOn(writeRuleset)
+    }
+    return bundledRuleset.get().asFile
 }
 
 fun Project.configureCoverageThresholds() {
