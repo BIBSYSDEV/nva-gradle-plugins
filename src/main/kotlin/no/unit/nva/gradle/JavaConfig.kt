@@ -6,6 +6,6 @@ abstract class JavaConfig {
     abstract val languageVersion: Property<Int>
 
     init {
-        languageVersion.convention(21)
+        languageVersion.convention(NvaConventionsExtension.JAVA_VERSION.toInt())
     }
 }

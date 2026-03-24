@@ -41,6 +41,7 @@ abstract class NvaConventionsExtension
                         ?: error("Could not load nva-plugin.properties from plugin resources")
                 }
 
+            val JAVA_VERSION: String = props.getProperty("java.version")
             val PMD_VERSION: String = props.getProperty("pmd.version")
             val JACOCO_VERSION: String = props.getProperty("jacoco.version")
             val ERRORPRONE_CORE_VERSION: String = props.getProperty("errorprone.core.version")

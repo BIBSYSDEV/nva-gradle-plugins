@@ -397,8 +397,8 @@ class NvaPluginsFunctionalTest {
                 """
                 nva {
                     jacoco {
-                        minMethodCoverage.set(java.math.BigDecimal("0.500"))
-                        minClassCoverage.set(java.math.BigDecimal("0.500"))
+                        minMethodCoverage.set(BigDecimal("0.500"))
+                        minClassCoverage.set(BigDecimal("0.500"))
                     }
                 }
                 """.trimIndent(),
