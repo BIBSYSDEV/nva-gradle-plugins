@@ -9,7 +9,7 @@ plugins {
 }
 
 group = "com.github.bibsysdev"
-version = "1.0.3-rc1"
+version = "1.0.3-rc2"
 
 repositories {
     gradlePluginPortal()

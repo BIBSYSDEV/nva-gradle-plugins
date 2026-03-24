@@ -200,6 +200,29 @@ class NvaPluginsFunctionalTest {
     }
 
     @Test
+    fun javaConventionsPluginUsesCustomJavaVersion() {
+        javaConventionsBuildFile(
+            $$"""
+            nva {
+                java { languageVersion.set(17) }
+                pmd { ignoreFailures.set(true) }
+            }
+
+            tasks.register("printJavaVersion") {
+                doLast {
+                    val toolchain = project.extensions.getByType(JavaPluginExtension::class.java).toolchain
+                    println("javaVersion=${toolchain.languageVersion.get()}")
+                }
+            }
+            """.trimIndent(),
+        )
+
+        val result = runner("printJavaVersion").build()
+
+        assertContains(result.output, "javaVersion=17")
+    }
+
+    @Test
     fun javaConventionsPluginConfiguresJunit5() {
         javaConventionsBuildFile(
             """

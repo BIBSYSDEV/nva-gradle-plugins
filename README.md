@@ -89,6 +89,9 @@ All plugins read from the shared `nva {}` extension:
 
 ```groovy
 nva {
+    java {
+        languageVersion = 21                         // Java toolchain version (default: 21)
+    }
     spotless {
         enabled = true                               // Apply formatting before build/test
         enforced = true                              // Fail build if formatting needed

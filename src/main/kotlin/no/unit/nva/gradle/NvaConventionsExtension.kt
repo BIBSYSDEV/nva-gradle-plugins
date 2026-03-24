@@ -10,12 +10,15 @@ abstract class NvaConventionsExtension
     constructor(
         objects: ObjectFactory,
     ) {
+        val java: JavaConfig = objects.newInstance(JavaConfig::class.java)
         val spotless: SpotlessConfig = objects.newInstance(SpotlessConfig::class.java)
         val pmd: PmdConfig = objects.newInstance(PmdConfig::class.java)
         val errorprone: ErrorproneConfig = objects.newInstance(ErrorproneConfig::class.java)
         val dependencyAnalysis: DependencyAnalysisConfig = objects.newInstance(DependencyAnalysisConfig::class.java)
         val spectral: SpectralConfig = objects.newInstance(SpectralConfig::class.java)
         val jacoco: JacocoConfig = objects.newInstance(JacocoConfig::class.java)
+
+        fun java(action: Action<JavaConfig>) = action.execute(java)
 
         fun spotless(action: Action<SpotlessConfig>) = action.execute(spotless)
 

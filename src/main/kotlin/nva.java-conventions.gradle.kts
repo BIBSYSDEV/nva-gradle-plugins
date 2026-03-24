@@ -17,7 +17,6 @@ val nva = extensions.getByType<NvaConventionsExtension>()
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(21))
         vendor.set(JvmVendorSpec.AMAZON)
     }
 }
@@ -54,6 +53,12 @@ tasks.named<JacocoReport>("jacocoTestReport") {
 
 // Defer consumer-configurable values so they can be set after plugin application
 afterEvaluate {
+    java {
+        toolchain {
+            languageVersion.set(JavaLanguageVersion.of(nva.java.languageVersion.get()))
+        }
+    }
+
     tasks.withType<JavaCompile>().configureEach {
         options.errorprone {
             allErrorsAsWarnings.set(nva.errorprone.allErrorsAsWarnings.get())
