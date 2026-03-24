@@ -84,7 +84,7 @@ tasks.named<DependencyUpdatesTask>("dependencyUpdates") {
 }
 
 fun Project.configureDependencyAnalysis() {
-    val severity = if (nva.dependencyAnalysisEnforced.get()) "fail" else "warn"
+    val severity = if (nva.dependencyAnalysis.enforced.get()) "fail" else "warn"
     dependencyAnalysis {
         issues {
             all {
@@ -98,7 +98,7 @@ fun Project.configureDependencyAnalysis() {
         }
     }
 
-    if (nva.dependencyAnalysisEnforced.get()) {
+    if (nva.dependencyAnalysis.enforced.get()) {
         tasks.named("check") {
             dependsOn(tasks.named("buildHealth"))
         }
@@ -106,33 +106,49 @@ fun Project.configureDependencyAnalysis() {
 }
 
 fun Project.configureSpectral() {
-    if (!nva.spectralDocuments.isPresent || nva.spectralDocuments.get().isEmpty()) return
+    val docs = nva.spectral.documents
+    val hasDocuments = docs.isPresent && docs.get().isNotEmpty()
+    if (hasDocuments) {
+        val spectral =
+            extensions.getByType(
+                io.github.michaelnestler.spectral.gradle.SpectralExtension::class.java,
+            )
+        spectral.version.set(NvaConventionsExtension.SPECTRAL_VERSION)
+        spectral.documents.from(docs.get().map { fileTree(".").matching { include(it) } })
+        spectral.ruleset.set(resolveSpectralRuleset())
 
-    val spectralExt =
-        extensions.getByType(io.github.michaelnestler.spectral.gradle.SpectralExtension::class.java)
-    spectralExt.version.set(NvaConventionsExtension.SPECTRAL_VERSION)
-    spectralExt.documents.from(nva.spectralDocuments.get().map { fileTree(".").matching { include(it) } })
-    spectralExt.ruleset.set(resolveSpectralRuleset())
-
-    tasks.named("check") {
-        dependsOn(tasks.named("spectral"))
+        tasks.named("check") {
+            dependsOn(tasks.named("spectral"))
+        }
     }
 }
 
-fun Project.resolveSpectralRuleset(): File =
-    if (nva.spectralRulesetFile.isPresent) {
-        nva.spectralRulesetFile.get().asFile
-    } else {
-        val content = NvaConventionsExtension.loadBundledResource("/spectral-ruleset.yaml")
-        val tempFile =
-            layout.buildDirectory
-                .file("spectral-ruleset.yaml")
+fun Project.resolveSpectralRuleset(): File {
+    val rulesetFile =
+        if (nva.spectral.rulesetFile.isPresent) {
+            nva.spectral.rulesetFile
                 .get()
                 .asFile
-        tempFile.parentFile.mkdirs()
-        tempFile.writeText(content)
-        tempFile
-    }
+        } else {
+            writeBundledResourceToFile("/spectral-ruleset.yaml", "spectral-ruleset.yaml")
+        }
+    return rulesetFile
+}
+
+fun Project.writeBundledResourceToFile(
+    resourcePath: String,
+    fileName: String,
+): File {
+    val content = NvaConventionsExtension.loadBundledResource(resourcePath)
+    val outputFile =
+        layout.buildDirectory
+            .file(fileName)
+            .get()
+            .asFile
+    outputFile.parentFile.mkdirs()
+    outputFile.writeText(content)
+    return outputFile
+}
 
 fun Project.configureCoverageThresholds() {
     tasks.named<JacocoCoverageVerification>("verifyCoverage") {
@@ -141,7 +157,7 @@ fun Project.configureCoverageThresholds() {
                 limit {
                     counter = "METHOD"
                     value = "COVEREDRATIO"
-                    minimum = nva.jacocoMinMethodCoverage.get()
+                    minimum = nva.jacoco.minMethodCoverage.get()
                 }
             }
 
@@ -149,7 +165,7 @@ fun Project.configureCoverageThresholds() {
                 limit {
                     counter = "CLASS"
                     value = "COVEREDRATIO"
-                    minimum = nva.jacocoMinClassCoverage.get()
+                    minimum = nva.jacoco.minClassCoverage.get()
                 }
             }
         }

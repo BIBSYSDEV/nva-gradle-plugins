@@ -107,8 +107,10 @@ class NvaPluginsFunctionalTest {
             }
 
             nva {
-                spotlessEnabled.set(false)
-                spotlessEnforced.set(false)
+                spotless {
+                    enabled.set(false)
+                    enforced.set(false)
+                }
             }
             $rootExtraConfig
             """.trimIndent(),
@@ -127,9 +129,11 @@ class NvaPluginsFunctionalTest {
             }
 
             nva {
-                spotlessEnabled.set(false)
-                spotlessEnforced.set(false)
-                pmdIgnoreFailures.set(true)
+                spotless {
+                    enabled.set(false)
+                    enforced.set(false)
+                }
+                pmd { ignoreFailures.set(true) }
             }
 
             dependencies {
@@ -153,8 +157,10 @@ class NvaPluginsFunctionalTest {
             }
 
             nva {
-                spotlessEnabled.set(false)
-                spotlessEnforced.set(false)
+                spotless {
+                    enabled.set(false)
+                    enforced.set(false)
+                }
             }
             $extraConfig
             """.trimIndent(),
@@ -198,7 +204,7 @@ class NvaPluginsFunctionalTest {
         javaConventionsBuildFile(
             """
             nva {
-                pmdIgnoreFailures.set(true)
+                pmd { ignoreFailures.set(true) }
             }
 
             dependencies {
@@ -241,8 +247,10 @@ class NvaPluginsFunctionalTest {
             }
 
             nva {
-                spotlessEnabled.set(false)
-                spotlessEnforced.set(false)
+                spotless {
+                    enabled.set(false)
+                    enforced.set(false)
+                }
             }
             """.trimIndent(),
         )
@@ -299,7 +307,7 @@ class NvaPluginsFunctionalTest {
         javaConventionsBuildFile(
             """
             nva {
-                pmdRulesetFile.set(file("custom-pmd.xml"))
+                pmd { rulesetFile.set(file("custom-pmd.xml")) }
             }
             """.trimIndent(),
         )
@@ -315,7 +323,7 @@ class NvaPluginsFunctionalTest {
         javaConventionsBuildFile(
             """
             nva {
-                pmdIgnoreFailures.set(true)
+                pmd { ignoreFailures.set(true) }
             }
             """.trimIndent(),
         )
@@ -365,8 +373,10 @@ class NvaPluginsFunctionalTest {
             rootExtraConfig =
                 """
                 nva {
-                    jacocoMinMethodCoverage.set(java.math.BigDecimal("0.500"))
-                    jacocoMinClassCoverage.set(java.math.BigDecimal("0.500"))
+                    jacoco {
+                        minMethodCoverage.set(java.math.BigDecimal("0.500"))
+                        minClassCoverage.set(java.math.BigDecimal("0.500"))
+                    }
                 }
                 """.trimIndent(),
         )
@@ -398,9 +408,9 @@ class NvaPluginsFunctionalTest {
             tasks.register("printDefaults") {
                 doLast {
                     val nva = project.extensions.getByType(no.unit.nva.gradle.NvaConventionsExtension::class.java)
-                    println("spotlessEnabled=${nva.spotlessEnabled.get()}")
-                    println("spotlessEnforced=${nva.spotlessEnforced.get()}")
-                    println("pmdIgnoreFailures=${nva.pmdIgnoreFailures.get()}")
+                    println("spotlessEnabled=${nva.spotless.enabled.get()}")
+                    println("spotlessEnforced=${nva.spotless.enforced.get()}")
+                    println("pmdIgnoreFailures=${nva.pmd.ignoreFailures.get()}")
                 }
             }
             """.trimIndent(),

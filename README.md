@@ -89,16 +89,28 @@ All plugins read from the shared `nva {}` extension:
 
 ```groovy
 nva {
-    spotlessEnabled = true                           // Apply formatting before build/test
-    spotlessEnforced = true                          // Fail build if formatting needed
-    errorproneAllErrorsAsWarnings = true               // Treat Error Prone errors as warnings
-    pmdIgnoreFailures = false                        // Allow PMD violations without failing
-    pmdRulesetFile = rootProject.file('pmd.xml')    // Custom PMD ruleset (default: bundled)
-    dependencyAnalysisEnforced = false                // Fail build on dependency analysis issues
-    spectralDocuments = ['docs/*.yaml']               // OpenAPI docs to lint (Spectral only active when set)
-    spectralRulesetFile = file('.spectral.yaml')     // Custom Spectral ruleset (default: bundled)
-    jacocoMinMethodCoverage = 1.000                  // Minimum method coverage ratio (0.0-1.0)
-    jacocoMinClassCoverage = 1.000                   // Minimum class coverage ratio (0.0-1.0)
+    spotless {
+        enabled = true                               // Apply formatting before build/test
+        enforced = true                              // Fail build if formatting needed
+    }
+    errorprone {
+        allErrorsAsWarnings = true                   // Treat Error Prone errors as warnings
+    }
+    pmd {
+        ignoreFailures = false                       // Allow PMD violations without failing
+        rulesetFile = rootProject.file('pmd.xml')   // Custom PMD ruleset (default: bundled)
+    }
+    dependencyAnalysis {
+        enforced = false                             // Fail build on dependency analysis issues
+    }
+    spectral {
+        documents = ['docs/*.yaml']                  // OpenAPI docs to lint (only active when set)
+        rulesetFile = file('.spectral.yaml')        // Custom Spectral ruleset (default: bundled)
+    }
+    jacoco {
+        minMethodCoverage = 1.000                    // Minimum method coverage ratio (0.0-1.0)
+        minClassCoverage = 1.000                     // Minimum class coverage ratio (0.0-1.0)
+    }
 }
 ```
 
@@ -108,7 +120,9 @@ To configure across all submodules from the root `build.gradle`:
 subprojects {
     pluginManager.withPlugin('nva.java-conventions') {
         nva {
-            pmdIgnoreFailures = true
+            pmd {
+                ignoreFailures = true
+            }
         }
     }
 }

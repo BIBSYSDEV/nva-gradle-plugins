@@ -56,18 +56,18 @@ tasks.named<JacocoReport>("jacocoTestReport") {
 afterEvaluate {
     tasks.withType<JavaCompile>().configureEach {
         options.errorprone {
-            allErrorsAsWarnings.set(nva.errorproneAllErrorsAsWarnings.get())
+            allErrorsAsWarnings.set(nva.errorprone.allErrorsAsWarnings.get())
         }
     }
 
     pmd {
-        isIgnoreFailures = nva.pmdIgnoreFailures.get()
+        isIgnoreFailures = nva.pmd.ignoreFailures.get()
     }
 
     tasks.withType<Pmd>().configureEach {
         ruleSetFiles =
-            if (nva.pmdRulesetFile.isPresent) {
-                files(nva.pmdRulesetFile)
+            if (nva.pmd.rulesetFile.isPresent) {
+                files(nva.pmd.rulesetFile)
             } else {
                 files(resources.text.fromString(NvaConventionsExtension.loadBundledResource("/pmd-ruleset.xml")))
             }

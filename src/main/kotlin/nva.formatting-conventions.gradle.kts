@@ -48,10 +48,10 @@ spotless {
 // Defer reading extension values so consumers can override them after plugin application
 afterEvaluate {
     configure<SpotlessExtension> {
-        isEnforceCheck = nva.spotlessEnforced.get()
+        isEnforceCheck = nva.spotless.enforced.get()
     }
 
-    if (nva.spotlessEnabled.get()) {
+    if (nva.spotless.enabled.get()) {
         tasks.withType<JavaCompile>().configureEach {
             dependsOn("spotlessApply")
         }
