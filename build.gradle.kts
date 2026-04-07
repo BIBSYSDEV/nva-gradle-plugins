@@ -114,6 +114,7 @@ publishing {
                     name.set("NVA Team")
                     organization.set("Sikt")
                     organizationUrl.set("https://sikt.no/")
+                    email.set("kontakt@sikt.no")
                 }
             }
 
