@@ -10,6 +10,7 @@
    ```
 4. The `publish.yml` workflow builds, tests, signs, and publishes to Maven Central automatically
 5. Artifacts appear on Maven Central within ~10-30 minutes
+6. Optional: Update GitHub description of release with detailed list of changes
 
 ## Testing locally
 
