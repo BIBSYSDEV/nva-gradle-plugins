@@ -12,6 +12,7 @@ spotless {
     // Java formatting only applies when java plugin is present
     plugins.withType<JavaPlugin> {
         java {
+            targetExclude("**/build/**")
             toggleOffOn() // Ignores sections between `spotless:off` / `spotless:on`
             googleJavaFormat().reflowLongStrings().formatJavadoc(true).reorderImports(true)
         }
@@ -19,6 +20,7 @@ spotless {
 
     groovyGradle {
         target("**/*.gradle")
+        targetExclude("**/build/**")
         greclipse()
         leadingTabsToSpaces(4)
         trimTrailingWhitespace()
@@ -27,18 +29,21 @@ spotless {
 
     format("markdown") {
         target("**/*.md")
+        targetExclude("**/build/**")
         prettier().config(mapOf("proseWrap" to "preserve"))
         endWithNewline()
     }
 
     format("yaml") {
         target("**/*.yaml", "**/*.yml")
+        targetExclude("**/build/**")
         prettier().config(mapOf("printWidth" to 120))
         endWithNewline()
     }
 
     format("misc") {
         target(".gitignore", ".gitattributes", ".editorconfig")
+        targetExclude("**/build/**")
         leadingTabsToSpaces(4)
         trimTrailingWhitespace()
         endWithNewline()
