@@ -57,7 +57,7 @@ afterEvaluate {
     }
 
     if (nva.spotless.enabled.get()) {
-        tasks.withType<JavaCompile>().configureEach {
+        tasks.matching { it.name == "spotlessCheck" }.configureEach {
             dependsOn("spotlessApply")
         }
     }
