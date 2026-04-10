@@ -62,6 +62,7 @@ afterEvaluate {
     tasks.withType<JavaCompile>().configureEach {
         options.errorprone {
             allErrorsAsWarnings.set(nva.errorprone.allErrorsAsWarnings.get())
+            excludedPaths.set(".*/build/.*")
         }
     }
 
@@ -70,6 +71,7 @@ afterEvaluate {
     }
 
     tasks.withType<Pmd>().configureEach {
+        exclude("**/build/**")
         ruleSetFiles =
             if (nva.pmd.rulesetFile.isPresent) {
                 files(nva.pmd.rulesetFile)
