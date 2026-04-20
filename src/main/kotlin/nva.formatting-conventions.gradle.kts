@@ -1,4 +1,3 @@
-import com.diffplug.gradle.spotless.SpotlessExtension
 import no.unit.nva.gradle.NvaConventionsExtension
 
 plugins {
@@ -9,6 +8,9 @@ plugins {
 val nva = extensions.getByType<NvaConventionsExtension>()
 
 spotless {
+    // Wire spotlessCheck into check ourselves (conditional on nva.spotless.enabled) in afterEvaluate block
+    isEnforceCheck = false
+
     // Java formatting only applies when java plugin is present
     plugins.withType<JavaPlugin> {
         java {
@@ -52,11 +54,8 @@ spotless {
 
 // Defer reading extension values so consumers can override them after plugin application
 afterEvaluate {
-    configure<SpotlessExtension> {
-        isEnforceCheck = nva.spotless.enforced.get()
-    }
-
     if (nva.spotless.enabled.get()) {
+        tasks.named("check") { dependsOn("spotlessCheck") }
         tasks.matching { it.name == "spotlessCheck" }.configureEach {
             dependsOn("spotlessApply")
         }

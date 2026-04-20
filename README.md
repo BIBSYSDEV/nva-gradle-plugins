@@ -93,8 +93,7 @@ nva {
         languageVersion = 21                         // Java toolchain version (default: 21)
     }
     spotless {
-        enabled = true                               // Apply formatting before build/test
-        enforced = true                              // Fail build if formatting needed
+        enabled = true                               // Auto-apply formatting and fail build on violations
     }
     errorprone {
         allErrorsAsWarnings = true                   // Treat Error Prone errors as warnings
