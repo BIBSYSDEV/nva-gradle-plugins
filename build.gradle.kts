@@ -1,8 +1,12 @@
+import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
+import org.gradle.kotlin.dsl.named
+
 plugins {
     `kotlin-dsl`
     `maven-publish`
     signing
     id("com.autonomousapps.dependency-analysis") version libs.versions.dependency.analysis
+    id("com.github.ben-manes.versions") version libs.versions.dependency.updates
     id("com.diffplug.spotless") version libs.versions.spotless
     id("io.gitlab.arturbosch.detekt") version libs.versions.detekt
     id("io.github.gradle-nexus.publish-plugin") version libs.versions.nexus.publish
@@ -85,6 +89,25 @@ spotless {
         leadingTabsToSpaces(4)
         trimTrailingWhitespace()
         endWithNewline()
+    }
+}
+
+fun isNonStable(version: String): Boolean {
+    val stableKeyword =
+        listOf("RELEASE", "FINAL", "GA").any {
+            version.uppercase().contains(it)
+        }
+    val stableVersionPattern = Regex("^[0-9,.v-]+(-r|-jre)?$")
+    return !stableKeyword && !stableVersionPattern.matches(version)
+}
+
+tasks.named<DependencyUpdatesTask>("dependencyUpdates") {
+    checkForGradleUpdate = true
+    outputDir = "build/dependencyUpdates"
+    reportfileName = "report"
+    gradleReleaseChannel = "current"
+    rejectVersionIf {
+        isNonStable(candidate.version) && !isNonStable(currentVersion)
     }
 }
 

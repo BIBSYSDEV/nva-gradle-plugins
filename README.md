@@ -136,6 +136,7 @@ subprojects {
 ./gradlew build                # Build, test, and run all checks
 ./gradlew test                 # Run tests only
 ./gradlew publishToMavenLocal  # Publish to local Maven for testing
+./gradlew dependencyUpdates --no-parallel # Check for dependency updates
 ```
 
 See [PUBLISHING.md](PUBLISHING.md) for release instructions.
