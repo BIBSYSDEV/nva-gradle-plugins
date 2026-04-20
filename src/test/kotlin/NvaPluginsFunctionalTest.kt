@@ -109,7 +109,6 @@ class NvaPluginsFunctionalTest {
             nva {
                 spotless {
                     enabled.set(false)
-                    enforced.set(false)
                 }
             }
             $rootExtraConfig
@@ -131,7 +130,6 @@ class NvaPluginsFunctionalTest {
             nva {
                 spotless {
                     enabled.set(false)
-                    enforced.set(false)
                 }
                 pmd { ignoreFailures.set(true) }
             }
@@ -159,7 +157,6 @@ class NvaPluginsFunctionalTest {
             nva {
                 spotless {
                     enabled.set(false)
-                    enforced.set(false)
                 }
             }
             $extraConfig
@@ -272,7 +269,6 @@ class NvaPluginsFunctionalTest {
             nva {
                 spotless {
                     enabled.set(false)
-                    enforced.set(false)
                 }
             }
             """.trimIndent(),
@@ -432,7 +428,6 @@ class NvaPluginsFunctionalTest {
                 doLast {
                     val nva = project.extensions.getByType(no.unit.nva.gradle.NvaConventionsExtension::class.java)
                     println("spotlessEnabled=${nva.spotless.enabled.get()}")
-                    println("spotlessEnforced=${nva.spotless.enforced.get()}")
                     println("pmdIgnoreFailures=${nva.pmd.ignoreFailures.get()}")
                 }
             }
@@ -442,7 +437,6 @@ class NvaPluginsFunctionalTest {
         val result = runner("printDefaults").build()
 
         assertTrue(result.output.contains("spotlessEnabled=true"))
-        assertTrue(result.output.contains("spotlessEnforced=true"))
         assertTrue(result.output.contains("pmdIgnoreFailures=false"))
     }
 }
