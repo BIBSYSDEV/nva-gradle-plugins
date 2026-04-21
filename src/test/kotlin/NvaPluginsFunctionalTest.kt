@@ -280,6 +280,43 @@ class NvaPluginsFunctionalTest {
     }
 
     @Test
+    fun formattingConventionsSerializesSpotlessTasksToAvoidLintsDirectoryRace() {
+        kotlinBuildFile(
+            """
+            plugins {
+                id("nva.formatting-conventions")
+                java
+            }
+
+            tasks.register("printSpotlessOrdering") {
+                doLast {
+                    listOf("spotlessMarkdownApply", "spotlessYamlApply", "spotlessMiscApply").forEach { name ->
+                        val task = tasks.named(name).get()
+                        val predecessors = task.mustRunAfter.getDependencies(task).map { it.name }.sorted()
+                        println("ORDERING:${'$'}name=${'$'}{predecessors.joinToString(",")}")
+                    }
+                }
+            }
+            """.trimIndent(),
+        )
+
+        val result = runner("printSpotlessOrdering", "-q").build()
+
+        val orderings =
+            result.output
+                .lineSequence()
+                .filter { it.startsWith("ORDERING:") }
+                .associate {
+                    val (key, value) = it.removePrefix("ORDERING:").split("=", limit = 2)
+                    key to value.split(",").filter { predecessor -> predecessor.isNotEmpty() }.toSet()
+                }
+
+        assertTrue("spotlessGroovyGradleApply" in orderings.getValue("spotlessMarkdownApply"))
+        assertTrue("spotlessMarkdownApply" in orderings.getValue("spotlessYamlApply"))
+        assertTrue("spotlessYamlApply" in orderings.getValue("spotlessMiscApply"))
+    }
+
+    @Test
     fun rootModuleConventionsPluginRegistersVerifyCoverageTask() {
         rootWithSubmoduleBuildFiles()
 

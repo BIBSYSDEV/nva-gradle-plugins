@@ -61,3 +61,20 @@ afterEvaluate {
         }
     }
 }
+
+// Workaround for https://github.com/diffplug/spotless/issues/2391
+// Spotless tasks share state in build/spotless-lints/ that isn't safe under intra-project parallelism
+// (Gradle 9 + org.gradle.parallel=true + configuration cache). Forces a total ordering
+// across per-format tasks so they never execute concurrently within a subproject.
+val spotlessFormatsInOrder = listOf("Java", "GroovyGradle", "Markdown", "Yaml", "Misc")
+val spotlessTaskNamesByFormat =
+    spotlessFormatsInOrder.associateWith { format ->
+        setOf("spotless$format", "spotless${format}Apply", "spotless${format}Check")
+    }
+spotlessFormatsInOrder.zipWithNext().forEach { (earlierFormat, laterFormat) ->
+    val earlierTaskNames = spotlessTaskNamesByFormat.getValue(earlierFormat)
+    val laterTaskNames = spotlessTaskNamesByFormat.getValue(laterFormat)
+    tasks.matching { it.name in laterTaskNames }.configureEach {
+        mustRunAfter(tasks.matching { it.name in earlierTaskNames })
+    }
+}
