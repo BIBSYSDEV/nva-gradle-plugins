@@ -120,6 +120,23 @@ fun Project.configureSpectral() {
     tasks.named("check") {
         dependsOn(tasks.named("spectral"))
     }
+
+    // The spectral plugin creates its report directory at configuration time and doesn't
+    // declare the junit report as a task output. Under org.gradle.parallel=true that lets
+    // :clean race :spectral, deleting build/ before spectral writes its report (ENOENT).
+    // Declaring the file as an output lets Gradle's destroyer/producer tracking order
+    // them correctly; recreating the parent directory in doFirst guards the execution
+    // phase in case something else removed it.
+    val junitReportFile = spectral.reports.junit.reportFile
+    tasks.named("spectral") {
+        outputs.file(junitReportFile)
+        doFirst {
+            junitReportFile
+                .get()
+                .asFile.parentFile
+                .mkdirs()
+        }
+    }
 }
 
 fun Project.resolveSpectralRuleset(): File {
