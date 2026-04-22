@@ -34,6 +34,25 @@ class NvaPluginsFunctionalTest {
         File(projectDir, "build.gradle.kts").writeText(content)
     }
 
+    private fun writeProjectFile(
+        relativePath: String,
+        content: String,
+    ) {
+        val file = File(projectDir, relativePath)
+        file.parentFile.mkdirs()
+        file.writeText(content)
+    }
+
+    private fun extractTaggedLines(
+        output: String,
+        prefix: String,
+    ): Set<String> =
+        output
+            .lineSequence()
+            .filter { it.startsWith(prefix) }
+            .map { it.removePrefix(prefix) }
+            .toSet()
+
     private fun writeSubmoduleJavaSourceAndTest(
         sourceBody: String,
         testBody: String,
@@ -314,6 +333,46 @@ class NvaPluginsFunctionalTest {
         assertTrue("spotlessGroovyGradleApply" in orderings.getValue("spotlessMarkdownApply"))
         assertTrue("spotlessMarkdownApply" in orderings.getValue("spotlessYamlApply"))
         assertTrue("spotlessYamlApply" in orderings.getValue("spotlessMiscApply"))
+    }
+
+    @Test
+    fun rootModuleConventionsTracksSpectralDocumentsAndRulesetAsInputs() {
+        // Regression: spectral's Exec task declares neither inputs nor outputs, so edits
+        // to docs/ruleset don't invalidate up-to-date. Convention plugin must wire both.
+        writeProjectFile("docs/api.yaml", "openapi: 3.0.0\n")
+        writeProjectFile("spectral.yaml", "extends: spectral:oas\n")
+
+        kotlinBuildFile(
+            $$"""
+            plugins { id("nva.root-module-conventions") }
+
+            repositories { mavenCentral() }
+
+            nva {
+                spotless { enabled.set(false) }
+                spectral {
+                    documents.set(listOf("docs/*.yaml"))
+                    rulesetFile.set(file("spectral.yaml"))
+                }
+            }
+
+            tasks.register("printSpectralWiring") {
+                doLast {
+                    val spectralTask = tasks.named("spectral").get()
+                    spectralTask.inputs.files.files.forEach { println("INPUT:${it.name}") }
+                    spectralTask.outputs.files.files.forEach { println("OUTPUT:${it.name}") }
+                }
+            }
+            """.trimIndent(),
+        )
+
+        val result = runner("printSpectralWiring", "-q").build()
+        val inputs = extractTaggedLines(result.output, "INPUT:")
+        val outputs = extractTaggedLines(result.output, "OUTPUT:")
+
+        assertTrue("api.yaml" in inputs, "docs not tracked as input; got: $inputs")
+        assertTrue("spectral.yaml" in inputs, "ruleset not tracked as input; got: $inputs")
+        assertTrue("spectral.xml" in outputs, "junit report not tracked as output; got: $outputs")
     }
 
     @Test

@@ -1,5 +1,6 @@
 import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 import no.unit.nva.gradle.NvaConventionsExtension
+import org.gradle.api.tasks.PathSensitivity
 
 // Backtick syntax = Gradle core plugins, id("...") = community/custom plugins
 plugins {
@@ -115,20 +116,27 @@ fun Project.configureSpectral() {
         )
     spectral.version.set(NvaConventionsExtension.SPECTRAL_VERSION)
     spectral.documents.from(docs.get().map { fileTree(".").matching { include(it) } })
-    spectral.ruleset.set(resolveSpectralRuleset())
+    val rulesetFile = resolveSpectralRuleset()
+    spectral.ruleset.set(rulesetFile)
 
     tasks.named("check") {
         dependsOn(tasks.named("spectral"))
     }
 
-    // The spectral plugin creates its report directory at configuration time and doesn't
-    // declare the junit report as a task output. Under org.gradle.parallel=true that lets
-    // :clean race :spectral, deleting build/ before spectral writes its report (ENOENT).
-    // Declaring the file as an output lets Gradle's destroyer/producer tracking order
-    // them correctly; recreating the parent directory in doFirst guards the execution
-    // phase in case something else removed it.
+    // The spectral plugin's Exec task declares neither inputs nor outputs. Declaring
+    // outputs lets Gradle order :spectral against destroyers like :clean under parallel
+    // builds; declaring inputs makes doc/ruleset edits invalidate up-to-date. doFirst
+    // mkdirs guards the report directory across the configure/execute boundary.
     val junitReportFile = spectral.reports.junit.reportFile
     tasks.named("spectral") {
+        inputs
+            .files(spectral.documents)
+            .withPathSensitivity(PathSensitivity.RELATIVE)
+            .withPropertyName("spectralDocuments")
+        inputs
+            .file(rulesetFile)
+            .withPathSensitivity(PathSensitivity.RELATIVE)
+            .withPropertyName("spectralRuleset")
         outputs.file(junitReportFile)
         doFirst {
             junitReportFile
