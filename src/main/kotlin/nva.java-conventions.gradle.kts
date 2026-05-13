@@ -38,7 +38,7 @@ tasks.named<Test>("test") {
     useJUnitPlatform()
     failFast = false
     testLogging {
-        events("skipped", "passed", "failed")
+        events("skipped", "failed")
         showCauses = true
         exceptionFormat = TestExceptionFormat.FULL
     }
