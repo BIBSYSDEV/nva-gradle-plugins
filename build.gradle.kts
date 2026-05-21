@@ -13,7 +13,7 @@ plugins {
 }
 
 group = "com.github.bibsysdev"
-version = "1.0.7"
+version = "1.0.8"
 
 repositories {
     gradlePluginPortal()
@@ -21,6 +21,7 @@ repositories {
 }
 
 dependencies {
+    implementation(libs.bakdata.mockito.plugin)
     implementation(libs.dependency.analysis.plugin)
     implementation(libs.dependency.updates.plugin)
     implementation(libs.errorprone.plugin)
@@ -51,6 +52,11 @@ dependencyAnalysis {
         all {
             onAny {
                 severity("fail")
+            }
+            // Applied only via `id("com.bakdata.mockito")` in a precompiled script plugin,
+            // so dependency-analysis can't see a Kotlin reference to its classes.
+            onUnusedDependencies {
+                exclude("com.bakdata.gradle:mockito")
             }
         }
     }

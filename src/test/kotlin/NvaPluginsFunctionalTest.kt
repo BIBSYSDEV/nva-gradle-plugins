@@ -463,6 +463,40 @@ class NvaPluginsFunctionalTest {
     }
 
     @Test
+    fun javaConventionsPluginAppliesBakdataMockitoAgentWiring() {
+        // Smoke test: catches accidental removal of the com.bakdata.mockito plugin from
+        // nva.java-conventions. Bakdata's plugin owns the actual agent-wiring behavior.
+        javaConventionsBuildFile(
+            $$"""
+            nva {
+                pmd { ignoreFailures.set(true) }
+            }
+
+            dependencies {
+                testImplementation("org.mockito:mockito-core:5.23.0")
+            }
+
+            tasks.register("printTestJvmArgs") {
+                dependsOn("configureMockitoAgent")
+                doLast {
+                    val testTask = tasks.named("test", Test::class.java).get()
+                    testTask.allJvmArgs.forEach { println("JVM_ARG:${it}") }
+                }
+            }
+            """.trimIndent(),
+        )
+
+        val result = runner("printTestJvmArgs", "-q").build()
+
+        assertTrue(
+            result.output.lineSequence().any {
+                it.startsWith("JVM_ARG:-javaagent:") && it.contains("mockito-core-5.23.0")
+            },
+            "expected -javaagent JVM arg referencing mockito-core-5.23.0; got: ${result.output}",
+        )
+    }
+
+    @Test
     fun verifyCoverageFailsWhenCoverageIsInsufficient() {
         rootWithSubmoduleBuildFiles()
         writeSubmoduleJavaSourceAndTest(
