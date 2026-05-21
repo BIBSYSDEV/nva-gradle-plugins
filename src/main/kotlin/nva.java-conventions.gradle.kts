@@ -8,6 +8,7 @@ plugins {
     jacoco
     pmd
     id("com.autonomousapps.dependency-analysis")
+    id("com.bakdata.mockito")
     id("net.ltgt.errorprone")
     id("nva.configuration")
     id("nva.formatting-conventions")
