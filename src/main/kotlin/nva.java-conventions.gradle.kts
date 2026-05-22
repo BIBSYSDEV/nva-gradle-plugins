@@ -45,6 +45,10 @@ tasks.named<Test>("test") {
     }
 }
 
+tasks.withType<Test>().configureEach {
+    systemProperty("log4j2.configurationFile", "classpath:nva-log4j2.xml")
+}
+
 tasks.named<JacocoReport>("jacocoTestReport") {
     reports {
         xml.required.set(true)
