@@ -49,6 +49,7 @@ afterEvaluate {
     configureDependencyAnalysis()
     configureSpectral()
     configureCoverageThresholds()
+    configureCoverageExcludes()
 }
 
 tasks.register("showCoverageReport") {
@@ -167,6 +168,24 @@ fun Project.resolveSpectralRuleset(): File {
         dependsOn(writeRuleset)
     }
     return bundledRuleset.get().asFile
+}
+
+fun Project.configureCoverageExcludes() {
+    val excludes = nva.generatedCode.get()
+    if (excludes.isEmpty()) return
+
+    val filter: org.gradle.testing.jacoco.tasks.JacocoReportBase.() -> Unit = {
+        classDirectories.setFrom(
+            files(
+                classDirectories.files.map { classesDir ->
+                    fileTree(classesDir) { exclude(excludes) }
+                },
+            ),
+        )
+    }
+
+    tasks.named<JacocoReport>("testCodeCoverageReport").configure(filter)
+    tasks.named<JacocoCoverageVerification>("verifyCoverage").configure(filter)
 }
 
 fun Project.configureCoverageThresholds() {

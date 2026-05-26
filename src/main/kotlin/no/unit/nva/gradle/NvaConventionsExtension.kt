@@ -2,6 +2,7 @@ package no.unit.nva.gradle
 
 import org.gradle.api.Action
 import org.gradle.api.model.ObjectFactory
+import org.gradle.api.provider.ListProperty
 import java.util.Properties
 import javax.inject.Inject
 
@@ -17,6 +18,15 @@ abstract class NvaConventionsExtension
         val dependencyAnalysis: DependencyAnalysisConfig = objects.newInstance(DependencyAnalysisConfig::class.java)
         val spectral: SpectralConfig = objects.newInstance(SpectralConfig::class.java)
         val jacoco: JacocoConfig = objects.newInstance(JacocoConfig::class.java)
+
+        // Ant-style glob patterns identifying generated code, applied as excludes by code-quality
+        // and coverage tools (PMD, JaCoCo aggregate report, coverage verification). Patterns are
+        // relative to source roots / class output roots, e.g. "gg/jte/generated/**".
+        abstract val generatedCode: ListProperty<String>
+
+        init {
+            generatedCode.convention(emptyList())
+        }
 
         fun java(action: Action<JavaConfig>) = action.execute(java)
 

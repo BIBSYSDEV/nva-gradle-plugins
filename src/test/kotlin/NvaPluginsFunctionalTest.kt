@@ -433,6 +433,51 @@ class NvaPluginsFunctionalTest {
         assertEquals(TaskOutcome.SUCCESS, result.task(":pmdMain")?.outcome)
     }
 
+    private fun writeGeneratedClassWithPmdViolations() {
+        val generatedDir = File(projectDir, "src/main/java/com/example/generated")
+        generatedDir.mkdirs()
+        File(generatedDir, "Generated.java").writeText(
+            """
+            package com.example.generated;
+
+            public class Generated {
+                public void x() {
+                    int a = 1;
+                    System.out.println(a);
+                }
+            }
+            """.trimIndent(),
+        )
+    }
+
+    @Test
+    fun pmdFailsWhenGeneratedCodeIsNotExcluded() {
+        javaConventionsBuildFile()
+        writeHelloJavaSource()
+        writeGeneratedClassWithPmdViolations()
+
+        val result = runner("pmdMain").buildAndFail()
+
+        assertNotEquals(TaskOutcome.SUCCESS, result.task(":pmdMain")?.outcome)
+    }
+
+    @Test
+    fun pmdSkipsCodeMatchingGeneratedCodePatterns() {
+        javaConventionsBuildFile(
+            """
+            nva {
+                generatedCode.set(listOf("com/example/generated/**"))
+            }
+            """.trimIndent(),
+        )
+        writeHelloJavaSource()
+        writeGeneratedClassWithPmdViolations()
+
+        val result = runner("pmdMain").build()
+
+        assertEquals(TaskOutcome.SUCCESS, result.task(":pmdMain")?.outcome)
+    }
+
     @Test
     fun errorProneDetectsDeadException() {
         javaConventionsBuildFile(
@@ -540,6 +585,55 @@ class NvaPluginsFunctionalTest {
                 assertEquals("covered", new Covered().covered());
                 """.trimIndent(),
         )
+
+        val result = runner("verifyCoverage").build()
+
+        assertEquals(TaskOutcome.SUCCESS, result.task(":verifyCoverage")?.outcome)
+    }
+
+    private fun writeSubmoduleGeneratedClass() {
+        val generatedDir = File(projectDir, "sub/src/main/java/com/example/generated")
+        generatedDir.mkdirs()
+        File(generatedDir, "Generated.java").writeText(
+            """
+            package com.example.generated;
+
+            public class Generated {
+                public String never() { return "never"; }
+            }
+            """.trimIndent(),
+        )
+    }
+
+    @Test
+    fun verifyCoverageFailsWhenGeneratedClassesAreNotExcluded() {
+        rootWithSubmoduleBuildFiles()
+        writeSubmoduleJavaSourceAndTest(
+            sourceBody = """public String covered() { return "covered"; }""",
+            testBody = """assertEquals("covered", new Covered().covered());""",
+        )
+        writeSubmoduleGeneratedClass()
+
+        val result = runner("verifyCoverage").buildAndFail()
+
+        assertNotEquals(TaskOutcome.SUCCESS, result.task(":verifyCoverage")?.outcome)
+    }
+
+    @Test
+    fun verifyCoveragePassesWhenGeneratedClassesAreExcluded() {
+        rootWithSubmoduleBuildFiles(
+            rootExtraConfig =
+                """
+                nva {
+                    generatedCode.set(listOf("com/example/generated/**"))
+                }
+                """.trimIndent(),
+        )
+        writeSubmoduleJavaSourceAndTest(
+            sourceBody = """public String covered() { return "covered"; }""",
+            testBody = """assertEquals("covered", new Covered().covered());""",
+        )
+        writeSubmoduleGeneratedClass()
 
         val result = runner("verifyCoverage").build()
 

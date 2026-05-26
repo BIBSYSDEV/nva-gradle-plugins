@@ -77,6 +77,7 @@ afterEvaluate {
 
     tasks.withType<Pmd>().configureEach {
         exclude("**/build/**")
+        nva.generatedCode.get().forEach { exclude(it) }
         ruleSetFiles =
             if (nva.pmd.rulesetFile.isPresent) {
                 files(nva.pmd.rulesetFile)

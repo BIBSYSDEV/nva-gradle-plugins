@@ -113,6 +113,7 @@ nva {
         minMethodCoverage = 1.000                    // Minimum method coverage ratio (0.0-1.0)
         minClassCoverage = 1.000                     // Minimum class coverage ratio (0.0-1.0)
     }
+    generatedCode = ['gg/jte/generated/**']          // Ant-style globs identifying generated code; excluded from PMD and JaCoCo coverage/verification
 }
 ```
 
