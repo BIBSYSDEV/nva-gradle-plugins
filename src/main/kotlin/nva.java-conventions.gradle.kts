@@ -9,9 +9,9 @@ plugins {
     pmd
     id("com.autonomousapps.dependency-analysis")
     id("com.bakdata.mockito")
+    id("com.diffplug.spotless")
     id("net.ltgt.errorprone")
     id("nva.configuration")
-    id("nva.formatting-conventions")
 }
 
 val nva = extensions.getByType<NvaConventionsExtension>()
@@ -53,6 +53,27 @@ tasks.named<JacocoReport>("jacocoTestReport") {
     reports {
         xml.required.set(true)
         html.required.set(true)
+    }
+}
+
+spotless {
+    // Wire spotlessCheck into check ourselves (conditional on nva.spotless.enabled) in afterEvaluate block
+    isEnforceCheck = false
+
+    java {
+        targetExclude("**/build/**")
+        toggleOffOn() // Ignores sections between `spotless:off` / `spotless:on`
+        googleJavaFormat().reflowLongStrings().formatJavadoc(true).reorderImports(true)
+    }
+}
+
+// Defer reading extension values so consumers can override them after plugin application
+afterEvaluate {
+    if (nva.spotless.enabled.get()) {
+        tasks.named("check") { dependsOn("spotlessCheck") }
+        tasks.matching { it.name == "spotlessCheck" }.configureEach {
+            dependsOn("spotlessApply")
+        }
     }
 }
 

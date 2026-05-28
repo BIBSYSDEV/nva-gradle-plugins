@@ -1,3 +1,4 @@
+import com.diffplug.gradle.spotless.SpotlessTask
 import no.unit.nva.gradle.NvaConventionsExtension
 
 plugins {
@@ -10,15 +11,6 @@ val nva = extensions.getByType<NvaConventionsExtension>()
 spotless {
     // Wire spotlessCheck into check ourselves (conditional on nva.spotless.enabled) in afterEvaluate block
     isEnforceCheck = false
-
-    // Java formatting only applies when java plugin is present
-    plugins.withType<JavaPlugin> {
-        java {
-            targetExclude("**/build/**")
-            toggleOffOn() // Ignores sections between `spotless:off` / `spotless:on`
-            googleJavaFormat().reflowLongStrings().formatJavadoc(true).reorderImports(true)
-        }
-    }
 
     groovyGradle {
         target("**/*.gradle")
@@ -60,6 +52,13 @@ afterEvaluate {
             dependsOn("spotlessApply")
         }
     }
+}
+
+// Root broad-scan formats (markdown, yaml, .gradle, misc) walk every subproject's tree.
+// Run them after all subproject tasks have finished so build/ contents are stable and
+// don't race with in-flight :test / :compile / :jar tasks writing under <sub>/build/.
+tasks.withType<SpotlessTask>().configureEach {
+    mustRunAfter(subprojects.map { it.tasks })
 }
 
 // Workaround for https://github.com/diffplug/spotless/issues/2391
