@@ -139,6 +139,9 @@ fun Project.configureSpectral() {
             .withPathSensitivity(PathSensitivity.RELATIVE)
             .withPropertyName("spectralRuleset")
         outputs.file(junitReportFile)
+        // Defer until subproject test JVMs release memory. Spectral's Node process
+        // gets SIGKILLed under concurrent memory pressure.
+        mustRunAfter(subprojects.map { it.tasks })
         doFirst {
             junitReportFile
                 .get()
