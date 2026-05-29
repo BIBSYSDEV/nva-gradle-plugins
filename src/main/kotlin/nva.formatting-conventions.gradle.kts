@@ -1,5 +1,6 @@
 import com.diffplug.gradle.spotless.SpotlessTask
 import no.unit.nva.gradle.NvaConventionsExtension
+import no.unit.nva.gradle.serializeSpotlessTasks
 
 plugins {
     id("com.diffplug.spotless")
@@ -61,19 +62,6 @@ tasks.withType<SpotlessTask>().configureEach {
     mustRunAfter(subprojects.map { it.tasks })
 }
 
-// Workaround for https://github.com/diffplug/spotless/issues/2391
-// Spotless tasks share state in build/spotless-lints/ that isn't safe under intra-project parallelism
-// (Gradle 9 + org.gradle.parallel=true + configuration cache). Forces a total ordering
-// across per-format tasks so they never execute concurrently within a subproject.
-val spotlessFormatsInOrder = listOf("Java", "GroovyGradle", "Markdown", "Yaml", "Misc")
-val spotlessTaskNamesByFormat =
-    spotlessFormatsInOrder.associateWith { format ->
-        setOf("spotless$format", "spotless${format}Apply", "spotless${format}Check")
-    }
-spotlessFormatsInOrder.zipWithNext().forEach { (earlierFormat, laterFormat) ->
-    val earlierTaskNames = spotlessTaskNamesByFormat.getValue(earlierFormat)
-    val laterTaskNames = spotlessTaskNamesByFormat.getValue(laterFormat)
-    tasks.matching { it.name in laterTaskNames }.configureEach {
-        mustRunAfter(tasks.matching { it.name in earlierTaskNames })
-    }
-}
+// Serialize all Spotless tasks build-wide: avoids the google-java-format classloader provisioning
+// race and the build/spotless-lints/ intra-project race (diffplug/spotless#2391) with one mechanism.
+serializeSpotlessTasks()

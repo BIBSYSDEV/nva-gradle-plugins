@@ -1,5 +1,6 @@
 import net.ltgt.gradle.errorprone.errorprone
 import no.unit.nva.gradle.NvaConventionsExtension
+import no.unit.nva.gradle.serializeSpotlessTasks
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 
 // Backtick syntax = Gradle core plugins, id("...") = community/custom plugins
@@ -65,6 +66,8 @@ spotless {
         googleJavaFormat().reflowLongStrings().formatJavadoc(true).reorderImports(true)
     }
 }
+
+serializeSpotlessTasks()
 
 // Defer reading extension values so consumers can override them after plugin application
 afterEvaluate {
