@@ -62,7 +62,6 @@ spotless {
 
     java {
         targetExclude("**/build/**")
-        toggleOffOn() // Ignores sections between `spotless:off` / `spotless:on`
         googleJavaFormat().reflowLongStrings().formatJavadoc(true).reorderImports(true)
     }
 }
