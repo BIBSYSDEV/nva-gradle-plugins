@@ -1,5 +1,6 @@
 import net.ltgt.gradle.errorprone.errorprone
 import no.unit.nva.gradle.NvaConventionsExtension
+import no.unit.nva.gradle.serializeSpotlessTasks
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 
 // Backtick syntax = Gradle core plugins, id("...") = community/custom plugins
@@ -9,9 +10,9 @@ plugins {
     pmd
     id("com.autonomousapps.dependency-analysis")
     id("com.bakdata.mockito")
+    id("com.diffplug.spotless")
     id("net.ltgt.errorprone")
     id("nva.configuration")
-    id("nva.formatting-conventions")
 }
 
 val nva = extensions.getByType<NvaConventionsExtension>()
@@ -53,6 +54,28 @@ tasks.named<JacocoReport>("jacocoTestReport") {
     reports {
         xml.required.set(true)
         html.required.set(true)
+    }
+}
+
+spotless {
+    // Wire spotlessCheck into check ourselves (conditional on nva.spotless.enabled) in afterEvaluate block
+    isEnforceCheck = false
+
+    java {
+        targetExclude("**/build/**")
+        googleJavaFormat().reflowLongStrings().formatJavadoc(true).reorderImports(true)
+    }
+}
+
+serializeSpotlessTasks()
+
+// Defer reading extension values so consumers can override them after plugin application
+afterEvaluate {
+    if (nva.spotless.enabled.get()) {
+        tasks.named("check") { dependsOn("spotlessCheck") }
+        tasks.matching { it.name == "spotlessCheck" }.configureEach {
+            dependsOn("spotlessApply")
+        }
     }
 }
 
