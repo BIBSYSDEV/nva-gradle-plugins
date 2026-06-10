@@ -33,9 +33,11 @@ pluginManagement {
 
 ### build.gradle (root project)
 
+The version literals below are examples; use the [latest release](https://github.com/BIBSYSDEV/nva-gradle-plugins/releases).
+
 ```groovy
 plugins {
-    id 'nva.root-module-conventions' version '1.0.1'
+    id 'nva.root-module-conventions' version '1.0.10'
 }
 ```
 
@@ -43,7 +45,7 @@ plugins {
 
 ```groovy
 plugins {
-    id 'nva.java-conventions' version '1.0.1'
+    id 'nva.java-conventions' version '1.0.10'
 }
 
 repositories {
@@ -63,7 +65,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.github.bibsysdev:nva-gradle-plugins:1.0.1'
+    implementation 'com.github.bibsysdev:nva-gradle-plugins:1.0.10'
 }
 ```
 
@@ -76,12 +78,16 @@ plugins {
 
 ## Plugins
 
-| Plugin ID                     | Apply to     | Description                                                      |
-| ----------------------------- | ------------ | ---------------------------------------------------------------- |
-| `nva.configuration`           | any          | Creates the `nva {}` extension. Applied automatically by others. |
-| `nva.java-conventions`        | submodules   | Java 21, Error Prone, PMD, JaCoCo, Spotless, Spectral, JUnit 5   |
-| `nva.formatting-conventions`  | any          | Spotless: Google Java Format, Groovy Gradle, Markdown, YAML      |
-| `nva.root-module-conventions` | root project | Aggregated JaCoCo coverage, dependency updates                   |
+| Plugin ID                     | Apply to     | Description                                                               |
+| ----------------------------- | ------------ | ------------------------------------------------------------------------- |
+| `nva.configuration`           | any          | Creates the `nva {}` extension. Applied automatically by others.          |
+| `nva.java-conventions`        | submodules   | Java 21, Error Prone, PMD, JaCoCo, Spotless (Google Java Format), JUnit 5 |
+| `nva.formatting-conventions`  | any          | Spotless: Groovy Gradle, Markdown, YAML, misc dotfiles                    |
+| `nva.root-module-conventions` | root project | Aggregated JaCoCo coverage, dependency updates, Spectral OpenAPI linting  |
+
+Spotless is wired so that `spotlessCheck` depends on `spotlessApply`: every build autoformats the source tree instead of failing on violations.
+This is intentional, so developers never have to run formatting manually.
+Set `nva.spotless.enabled = false` to opt out entirely.
 
 ## Configuration
 
@@ -93,7 +99,7 @@ nva {
         languageVersion = 21                         // Java toolchain version (default: 21)
     }
     spotless {
-        enabled = true                               // Auto-apply formatting and fail build on violations
+        enabled = true                               // Auto-apply formatting on every build
     }
     errorprone {
         allErrorsAsWarnings = true                   // Treat Error Prone errors as warnings
