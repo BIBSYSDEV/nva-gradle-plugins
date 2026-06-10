@@ -1,6 +1,5 @@
 import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 import no.unit.nva.gradle.NvaConventionsExtension
-import org.gradle.api.tasks.PathSensitivity
 
 // Backtick syntax = Gradle core plugins, id("...") = community/custom plugins
 plugins {
@@ -40,9 +39,9 @@ tasks.register<JacocoCoverageVerification>("verifyCoverage") {
     description = "Verify test coverage"
     dependsOn(testCodeCoverageReportTask)
 
-    executionData.setFrom(testCodeCoverageReportTask.get().executionData)
-    sourceDirectories.setFrom(testCodeCoverageReportTask.get().sourceDirectories)
-    classDirectories.setFrom(testCodeCoverageReportTask.get().classDirectories)
+    executionData.setFrom(testCodeCoverageReportTask.map { it.executionData })
+    sourceDirectories.setFrom(testCodeCoverageReportTask.map { it.sourceDirectories })
+    classDirectories.setFrom(testCodeCoverageReportTask.map { it.classDirectories })
 }
 
 afterEvaluate {
@@ -158,13 +157,15 @@ fun Project.resolveSpectralRuleset(): File {
             .asFile
     }
     val bundledRuleset = layout.buildDirectory.file("spectral-ruleset.yaml")
+    val rulesetContent = NvaConventionsExtension.loadBundledResource("/spectral-ruleset.yaml")
     val writeRuleset =
         tasks.register("writeSpectralRuleset") {
+            // Explicit content input so a changed bundled ruleset invalidates up-to-date,
+            // without relying on the implicit plugin classloader hash.
+            inputs.property("rulesetContent", rulesetContent)
             outputs.file(bundledRuleset)
             doLast {
-                bundledRuleset.get().asFile.writeText(
-                    NvaConventionsExtension.loadBundledResource("/spectral-ruleset.yaml"),
-                )
+                bundledRuleset.get().asFile.writeText(rulesetContent)
             }
         }
     tasks.named("spectral") {
@@ -177,18 +178,17 @@ fun Project.configureCoverageExcludes() {
     val excludes = nva.generatedCode.get()
     if (excludes.isEmpty()) return
 
-    val filter: org.gradle.testing.jacoco.tasks.JacocoReportBase.() -> Unit = {
+    // verifyCoverage mirrors the report task's classDirectories, so filtering the report task covers both
+    tasks.named<JacocoReport>("testCodeCoverageReport") {
+        val originalClassDirectories = classDirectories.from.toList()
         classDirectories.setFrom(
-            files(
-                classDirectories.files.map { classesDir ->
+            provider {
+                files(originalClassDirectories).files.map { classesDir ->
                     fileTree(classesDir) { exclude(excludes) }
-                },
-            ),
+                }
+            },
         )
     }
-
-    tasks.named<JacocoReport>("testCodeCoverageReport").configure(filter)
-    tasks.named<JacocoCoverageVerification>("verifyCoverage").configure(filter)
 }
 
 fun Project.configureCoverageThresholds() {
@@ -218,6 +218,6 @@ fun isNonStable(version: String): Boolean {
         listOf("RELEASE", "FINAL", "GA").any {
             version.uppercase().contains(it)
         }
-    val stableVersionPattern = Regex("^[0-9,.v-]+(-r|-jre)?$")
+    val stableVersionPattern = Regex("^[0-9.v-]+(-r|-jre)?$")
     return !stableKeyword && !stableVersionPattern.matches(version)
 }

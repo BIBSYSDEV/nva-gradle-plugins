@@ -1,5 +1,4 @@
 import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
-import org.gradle.kotlin.dsl.named
 
 plugins {
     `kotlin-dsl`
@@ -103,7 +102,7 @@ fun isNonStable(version: String): Boolean {
         listOf("RELEASE", "FINAL", "GA").any {
             version.uppercase().contains(it)
         }
-    val stableVersionPattern = Regex("^[0-9,.v-]+(-r|-jre)?$")
+    val stableVersionPattern = Regex("^[0-9.v-]+(-r|-jre)?$")
     return !stableKeyword && !stableVersionPattern.matches(version)
 }
 

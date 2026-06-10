@@ -626,6 +626,39 @@ class NvaPluginsFunctionalTest {
     }
 
     @Test
+    fun javaConventionsIsCompatibleWithConfigurationCache() {
+        gradleProperties.writeText("org.gradle.configuration-cache=true\n")
+        javaConventionsBuildFile(
+            """
+            nva {
+                pmd { ignoreFailures.set(true) }
+            }
+            """.trimIndent(),
+        )
+        writeHelloJavaSource()
+
+        runner("compileJava").build()
+        val secondRun = runner("compileJava").build()
+
+        assertContains(secondRun.output, "Configuration cache entry reused.")
+    }
+
+    @Test
+    fun rootModuleConventionsIsCompatibleWithConfigurationCache() {
+        rootWithSubmoduleBuildFiles()
+        gradleProperties.writeText("org.gradle.configuration-cache=true\n")
+        writeSubmoduleJavaSourceAndTest(
+            sourceBody = """public String covered() { return "covered"; }""",
+            testBody = """assertEquals("covered", new Covered().covered());""",
+        )
+
+        runner("verifyCoverage").build()
+        val secondRun = runner("verifyCoverage").build()
+
+        assertContains(secondRun.output, "Configuration cache entry reused.")
+    }
+
+    @Test
     fun nvaExtensionDefaultsAreApplied() {
         kotlinBuildFile(
             $$"""

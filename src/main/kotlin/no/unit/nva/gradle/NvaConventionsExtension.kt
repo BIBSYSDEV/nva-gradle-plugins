@@ -47,7 +47,7 @@ abstract class NvaConventionsExtension
                 Properties().apply {
                     NvaConventionsExtension::class.java
                         .getResourceAsStream("/nva-plugin.properties")
-                        ?.let { load(it) }
+                        ?.use { load(it) }
                         ?: error("Could not load nva-plugin.properties from plugin resources")
                 }
 
@@ -60,8 +60,7 @@ abstract class NvaConventionsExtension
             fun loadBundledResource(path: String): String =
                 NvaConventionsExtension::class.java
                     .getResourceAsStream(path)
-                    ?.reader()
-                    ?.readText()
+                    ?.use { it.reader().readText() }
                     ?: error("Could not load $path from plugin resources")
         }
     }
