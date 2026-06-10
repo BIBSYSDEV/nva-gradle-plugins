@@ -36,7 +36,7 @@ pmd {
     ruleSets = emptyList()
 }
 
-tasks.named<Test>("test") {
+tasks.withType<Test>().configureEach {
     useJUnitPlatform()
     failFast = false
     testLogging {
@@ -44,9 +44,6 @@ tasks.named<Test>("test") {
         showCauses = true
         exceptionFormat = TestExceptionFormat.FULL
     }
-}
-
-tasks.withType<Test>().configureEach {
     systemProperty("log4j2.configurationFile", "classpath:nva-log4j2.xml")
 }
 
@@ -77,10 +74,7 @@ afterEvaluate {
             dependsOn("spotlessApply")
         }
     }
-}
 
-// Defer consumer-configurable values so they can be set after plugin application
-afterEvaluate {
     java {
         toolchain {
             languageVersion.set(JavaLanguageVersion.of(nva.java.languageVersion.get()))
