@@ -1,6 +1,6 @@
 [versions]
 bakdata-mockito = "2.2.0"
-dependency-analysis = "3.14.1"
+dependency-analysis = "3.15.0"
 dependency-updates = "0.54.0"
 detekt = "1.23.8"
 errorprone-plugin = "5.1.0"
