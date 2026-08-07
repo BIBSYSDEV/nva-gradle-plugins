@@ -1,4 +1,5 @@
 import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
+import java.util.Properties
 
 plugins {
     `kotlin-dsl`
@@ -95,6 +96,27 @@ spotless {
         trimTrailingWhitespace()
         endWithNewline()
     }
+}
+
+// Tool versions applied to consuming projects live in nva-plugin.properties as plain strings,
+// invisible to dependencyUpdates. Mirroring them into a synthetic configuration makes the report
+// flag new releases; bump the properties file manually when it does. Spectral (npm CLI) and the
+// Java version cannot be covered this way.
+val nvaPluginProperties =
+    Properties().also { properties ->
+        file("src/main/resources/nva-plugin.properties").inputStream().use(properties::load)
+    }
+
+val consumerToolVersions =
+    configurations.create("consumerToolVersions") {
+        isCanBeConsumed = false
+        isTransitive = false
+    }
+
+dependencies {
+    consumerToolVersions("com.google.errorprone:error_prone_core:${nvaPluginProperties["errorprone.core.version"]}")
+    consumerToolVersions("net.sourceforge.pmd:pmd-java:${nvaPluginProperties["pmd.version"]}")
+    consumerToolVersions("org.jacoco:org.jacoco.core:${nvaPluginProperties["jacoco.version"]}")
 }
 
 fun isNonStable(version: String): Boolean {
