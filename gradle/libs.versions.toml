@@ -1,17 +1,17 @@
 [versions]
 bakdata-mockito = "2.2.0"
-dependency-analysis = "3.14.1"
-dependency-updates = "0.54.0"
+dependency-analysis = "3.18.0"
+dependency-updates = "0.59.0"
 detekt = "1.23.8"
 errorprone-plugin = "5.1.0"
-junit-bom = "5.14.2"
+junit-bom = "6.1.2"
 nexus-publish = "2.0.0"
 spectral = "0.2.0-0"
-spotless = "8.6.0"
+spotless = "8.9.0"
 
 [libraries]
 bakdata-mockito-plugin = { module = "com.bakdata.gradle:mockito", version.ref = "bakdata-mockito" }
-dependency-updates-plugin = { module = "com.github.ben-manes:gradle-versions-plugin", version.ref = "dependency-updates" }
+dependency-updates-plugin = { module = "io.github.ben-manes:gradle-versions-plugin", version.ref = "dependency-updates" }
 errorprone-plugin = { module = "net.ltgt.gradle:gradle-errorprone-plugin", version.ref = "errorprone-plugin" }
 junit-bom = { module = "org.junit:junit-bom", version.ref = "junit-bom" }
 dependency-analysis-plugin = { module = "com.autonomousapps:dependency-analysis-gradle-plugin", version.ref = "dependency-analysis" }

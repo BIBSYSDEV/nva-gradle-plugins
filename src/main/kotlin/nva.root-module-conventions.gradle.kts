@@ -7,7 +7,7 @@ plugins {
     base
     `jacoco-report-aggregation`
     id("com.autonomousapps.dependency-analysis")
-    id("com.github.ben-manes.versions")
+    id("io.github.ben-manes.versions")
     id("io.github.michael-nestler.spectral")
     id("nva.configuration")
     id("nva.formatting-conventions")
