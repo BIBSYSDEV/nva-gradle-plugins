@@ -1,5 +1,6 @@
 import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 import no.unit.nva.gradle.NvaConventionsExtension
+import no.unit.nva.gradle.VersionCooldown
 
 // Backtick syntax = Gradle core plugins, id("...") = community/custom plugins
 plugins {
@@ -80,7 +81,8 @@ tasks.named<DependencyUpdatesTask>("dependencyUpdates") {
     reportfileName = "report"
     gradleReleaseChannel = "current"
     rejectVersionIf {
-        isNonStable(candidate.version) && !isNonStable(currentVersion)
+        (isNonStable(candidate.version) && !isNonStable(currentVersion)) ||
+            VersionCooldown.isWithinCooldown(candidate.group, candidate.module, candidate.version)
     }
 }
 
