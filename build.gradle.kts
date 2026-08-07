@@ -5,7 +5,7 @@ plugins {
     `maven-publish`
     signing
     id("com.autonomousapps.dependency-analysis") version libs.versions.dependency.analysis
-    id("com.github.ben-manes.versions") version libs.versions.dependency.updates
+    id("io.github.ben-manes.versions") version libs.versions.dependency.updates
     id("com.diffplug.spotless") version libs.versions.spotless
     id("io.gitlab.arturbosch.detekt") version libs.versions.detekt
     id("io.github.gradle-nexus.publish-plugin") version libs.versions.nexus.publish
