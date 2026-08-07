@@ -16,7 +16,7 @@ plugins {
 // Automatically aggregate coverage from all subprojects
 dependencies {
     subprojects.forEach { subproject ->
-        "jacocoAggregation"(subproject)
+        "jacocoAggregation"(project(subproject.path))
     }
 }
 
