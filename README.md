@@ -82,7 +82,7 @@ plugins {
 | ----------------------------- | ------------ | ------------------------------------------------------------------------- |
 | `nva.configuration`           | any          | Creates the `nva {}` extension. Applied automatically by others.          |
 | `nva.java-conventions`        | submodules   | Java 21, Error Prone, PMD, JaCoCo, Spotless (Google Java Format), JUnit 5 |
-| `nva.formatting-conventions`  | any          | Spotless: Groovy Gradle, Markdown, YAML, misc dotfiles                    |
+| `nva.formatting-conventions`  | any          | Spotless: Groovy Gradle (whitespace only), Markdown, YAML, misc dotfiles  |
 | `nva.root-module-conventions` | root project | Aggregated JaCoCo coverage, dependency updates, Spectral OpenAPI linting  |
 
 Spotless is wired so that `spotlessCheck` depends on `spotlessApply`: every build autoformats the source tree instead of failing on violations.

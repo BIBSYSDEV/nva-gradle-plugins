@@ -16,7 +16,6 @@ spotless {
     groovyGradle {
         target("**/*.gradle")
         targetExclude("**/build/**")
-        greclipse()
         leadingTabsToSpaces(4)
         trimTrailingWhitespace()
         endWithNewline()
