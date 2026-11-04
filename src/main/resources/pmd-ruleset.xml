@@ -41,7 +41,7 @@
     <exclude name="ExcessiveImports"/>
     <exclude name="AvoidCatchingGenericException"/>
     <exclude name="SignatureDeclareThrowsException"/>
-    <exclude name="UseUtilityClass"/>
+    <exclude name="InstantiableUtilityClass"/>
     <exclude name="UseObjectForClearerAPI"/>
     <exclude name="TooManyMethods"/>
   </rule>
