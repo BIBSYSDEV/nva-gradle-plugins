@@ -107,6 +107,33 @@ class PmdConventionsFunctionalTest : GradleFunctionalTest() {
         assertContains(result.output, "nva.pmd.excludedRules only applies to the bundled PMD ruleset")
     }
 
+    @Test
+    fun pmdSkipsTestSourcesWhenTestAnalysisIsDisabled() {
+        writeProjectFile(
+            "src/test/java/com/example/PrinterTest.java",
+            """
+            package com.example;
+
+            public class PrinterTest {
+                public void print() {
+                    System.out.println("hello");
+                }
+            }
+            """.trimIndent(),
+        )
+        javaConventionsBuildFile(
+            """
+            nva {
+                pmd { analyzeTests.set(false) }
+            }
+            """.trimIndent(),
+        )
+
+        val result = runner("pmdTest").build()
+
+        assertEquals(TaskOutcome.SKIPPED, result.task(":pmdTest")?.outcome)
+    }
+
     private fun writeGeneratedClassWithPmdViolations() {
         val generatedDir = File(projectDir, "src/main/java/com/example/generated")
         generatedDir.mkdirs()

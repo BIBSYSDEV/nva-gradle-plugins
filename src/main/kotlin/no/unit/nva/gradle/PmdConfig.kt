@@ -6,6 +6,7 @@ import org.gradle.api.provider.SetProperty
 
 abstract class PmdConfig {
     abstract val ignoreFailures: Property<Boolean>
+    abstract val analyzeTests: Property<Boolean>
     abstract val rulesetFile: RegularFileProperty
 
     /** Rule names to exclude from the bundled ruleset, e.g. "LawOfDemeter". Not combinable with [rulesetFile]. */
@@ -13,6 +14,7 @@ abstract class PmdConfig {
 
     init {
         ignoreFailures.convention(false)
+        analyzeTests.convention(true)
         excludedRules.convention(emptySet())
     }
 }

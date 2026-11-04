@@ -101,6 +101,10 @@ afterEvaluate {
         isIgnoreFailures = nva.pmd.ignoreFailures.get()
     }
 
+    tasks.named("pmdTest") {
+        enabled = nva.pmd.analyzeTests.get()
+    }
+
     val excludedPmdRules = nva.pmd.excludedRules.get()
     if (nva.pmd.rulesetFile.isPresent && excludedPmdRules.isNotEmpty()) {
         throw GradleException(

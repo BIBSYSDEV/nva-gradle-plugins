@@ -106,6 +106,7 @@ nva {
     }
     pmd {
         ignoreFailures = false                       // Allow PMD violations without failing
+        analyzeTests = true                          // Run PMD on test sources (pmdTest)
         excludedRules = ['LawOfDemeter']             // Rules to exclude from the bundled ruleset
         rulesetFile = rootProject.file('pmd.xml')   // Custom PMD ruleset (default: bundled)
     }
