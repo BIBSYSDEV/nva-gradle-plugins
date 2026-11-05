@@ -1,48 +1,12 @@
-import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.io.TempDir
 import java.io.File
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
-class NvaPluginsFunctionalTest {
-    @TempDir
-    lateinit var projectDir: File
-
-    private val settingsFile get() = File(projectDir, "settings.gradle.kts")
-    private val gradleProperties get() = File(projectDir, "gradle.properties")
-
-    @BeforeEach
-    fun setup() {
-        settingsFile.writeText("""rootProject.name = "test-project"""")
-        gradleProperties.writeText("org.gradle.configuration-cache=false\n")
-    }
-
-    private fun runner(vararg args: String) =
-        GradleRunner
-            .create()
-            .withProjectDir(projectDir)
-            .withPluginClasspath()
-            .withArguments(*args, "--stacktrace")
-            .forwardOutput()
-
-    private fun kotlinBuildFile(content: String) {
-        File(projectDir, "build.gradle.kts").writeText(content)
-    }
-
-    private fun writeProjectFile(
-        relativePath: String,
-        content: String,
-    ) {
-        val file = File(projectDir, relativePath)
-        file.parentFile.mkdirs()
-        file.writeText(content)
-    }
-
+class NvaPluginsFunctionalTest : GradleFunctionalTest() {
     private fun extractTaggedLines(
         output: String,
         prefix: String,
@@ -82,22 +46,6 @@ class NvaPluginsFunctionalTest {
                 @Test
                 void testCovered() {
                     $testBody
-                }
-            }
-            """.trimIndent(),
-        )
-    }
-
-    private fun writeHelloJavaSource() {
-        val srcDir = File(projectDir, "src/main/java/com/example")
-        srcDir.mkdirs()
-        File(srcDir, "Hello.java").writeText(
-            """
-            package com.example;
-
-            public class Hello {
-                public String greet() {
-                    return "hello";
                 }
             }
             """.trimIndent(),
@@ -158,27 +106,6 @@ class NvaPluginsFunctionalTest {
                 testRuntimeOnly("org.junit.platform:junit-platform-launcher")
             }
             $submoduleExtraConfig
-            """.trimIndent(),
-        )
-    }
-
-    private fun javaConventionsBuildFile(extraConfig: String = "") {
-        kotlinBuildFile(
-            """
-            plugins {
-                id("nva.java-conventions")
-            }
-
-            repositories {
-                mavenCentral()
-            }
-
-            nva {
-                spotless {
-                    enabled.set(false)
-                }
-            }
-            $extraConfig
             """.trimIndent(),
         )
     }
@@ -368,99 +295,6 @@ class NvaPluginsFunctionalTest {
 
         assertTrue(result.output.contains("verifyCoverage"))
         assertTrue(result.output.contains("showCoverageReport"))
-    }
-
-    @Test
-    fun javaConventionsPluginUsesCustomPmdRuleset() {
-        // Minimal ruleset with NO rules — if the bundled ruleset is used instead,
-        // PMD will find violations and fail (since pmdIgnoreFailures is false)
-        val customRuleset = File(projectDir, "custom-pmd.xml")
-        customRuleset.writeText(
-            """
-            <?xml version="1.0"?>
-            <ruleset name="Empty"
-                     xmlns="https://pmd.sourceforge.net/ruleset/2.0.0"
-                     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                     xsi:schemaLocation="https://pmd.sourceforge.net/ruleset/2.0.0
-                     https://pmd.sourceforge.io/ruleset_2_0_0.xsd">
-                <description>Empty ruleset to verify custom ruleset is applied</description>
-            </ruleset>
-            """.trimIndent(),
-        )
-
-        // Use code that would trigger bundled PMD rules (missing Javadoc, short variable name, etc.)
-        val srcDir = File(projectDir, "src/main/java/com/example")
-        srcDir.mkdirs()
-        File(srcDir, "Foo.java").writeText(
-            """
-            package com.example;
-
-            public class Foo {
-                public void x() {
-                    int a = 1;
-                    System.out.println(a);
-                }
-            }
-            """.trimIndent(),
-        )
-
-        javaConventionsBuildFile(
-            """
-            nva {
-                pmd { rulesetFile.set(file("custom-pmd.xml")) }
-            }
-            """.trimIndent(),
-        )
-
-        // Should pass with empty ruleset, would fail with bundled ruleset
-        val result = runner("pmdMain").build()
-
-        assertEquals(TaskOutcome.SUCCESS, result.task(":pmdMain")?.outcome)
-    }
-
-    private fun writeGeneratedClassWithPmdViolations() {
-        val generatedDir = File(projectDir, "src/main/java/com/example/generated")
-        generatedDir.mkdirs()
-        File(generatedDir, "Generated.java").writeText(
-            """
-            package com.example.generated;
-
-            public class Generated {
-                public void x() {
-                    int a = 1;
-                    System.out.println(a);
-                }
-            }
-            """.trimIndent(),
-        )
-    }
-
-    @Test
-    fun pmdFailsWhenGeneratedCodeIsNotExcluded() {
-        javaConventionsBuildFile()
-        writeHelloJavaSource()
-        writeGeneratedClassWithPmdViolations()
-
-        val result = runner("pmdMain").buildAndFail()
-
-        assertNotEquals(TaskOutcome.SUCCESS, result.task(":pmdMain")?.outcome)
-    }
-
-    @Test
-    fun pmdSkipsCodeMatchingGeneratedCodePatterns() {
-        javaConventionsBuildFile(
-            """
-            nva {
-                generatedCode.set(listOf("com/example/generated/**"))
-            }
-            """.trimIndent(),
-        )
-        writeHelloJavaSource()
-        writeGeneratedClassWithPmdViolations()
-
-        val result = runner("pmdMain").build()
-
-        assertEquals(TaskOutcome.SUCCESS, result.task(":pmdMain")?.outcome)
     }
 
     @Test

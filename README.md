@@ -106,6 +106,7 @@ nva {
     }
     pmd {
         ignoreFailures = false                       // Allow PMD violations without failing
+        excludedRules = ['LawOfDemeter']             // Rules to exclude from the bundled ruleset
         rulesetFile = rootProject.file('pmd.xml')   // Custom PMD ruleset (default: bundled)
     }
     dependencyAnalysis {
@@ -122,6 +123,10 @@ nva {
     generatedCode = ['gg/jte/generated/**']          // Ant-style globs identifying generated code; excluded from PMD and JaCoCo coverage/verification
 }
 ```
+
+Prefer `pmd.excludedRules` over a custom `pmd.rulesetFile`, so the project keeps getting changes to the bundled [PMD ruleset](src/main/resources/pmd-ruleset.xml).
+Use plain rule names (`LawOfDemeter`, not `category/java/design.xml/LawOfDemeter`).
+The two settings cannot be combined: a custom ruleset replaces the bundled one entirely.
 
 To configure across all submodules from the root `build.gradle`:
 

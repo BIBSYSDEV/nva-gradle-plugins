@@ -1,5 +1,6 @@
 import net.ltgt.gradle.errorprone.errorprone
 import no.unit.nva.gradle.NvaConventionsExtension
+import no.unit.nva.gradle.WritePmdRuleset
 import no.unit.nva.gradle.serializeSpotlessTasks
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 
@@ -35,6 +36,14 @@ pmd {
     toolVersion = NvaConventionsExtension.PMD_VERSION
     ruleSets = emptyList()
 }
+
+val writePmdRuleset =
+    tasks.register<WritePmdRuleset>("writePmdRuleset") {
+        baseRulesetContent.set(NvaConventionsExtension.loadBundledResource("/pmd-ruleset.xml"))
+        excludedRules.set(nva.pmd.excludedRules)
+        baseRulesetFile.set(layout.buildDirectory.file("nva/pmd/base-ruleset.xml"))
+        rulesetFile.set(layout.buildDirectory.file("nva/pmd/ruleset.xml"))
+    }
 
 tasks.withType<Test>().configureEach {
     useJUnitPlatform()
@@ -92,6 +101,14 @@ afterEvaluate {
         isIgnoreFailures = nva.pmd.ignoreFailures.get()
     }
 
+    val excludedPmdRules = nva.pmd.excludedRules.get()
+    if (nva.pmd.rulesetFile.isPresent && excludedPmdRules.isNotEmpty()) {
+        throw GradleException(
+            "nva.pmd.excludedRules only applies to the bundled PMD ruleset. " +
+                "Exclude the rules in ${nva.pmd.rulesetFile.get().asFile.name} instead, or remove nva.pmd.rulesetFile.",
+        )
+    }
+
     tasks.withType<Pmd>().configureEach {
         exclude("**/build/**")
         nva.generatedCode.get().forEach { exclude(it) }
@@ -99,7 +116,7 @@ afterEvaluate {
             if (nva.pmd.rulesetFile.isPresent) {
                 files(nva.pmd.rulesetFile)
             } else {
-                files(resources.text.fromString(NvaConventionsExtension.loadBundledResource("/pmd-ruleset.xml")))
+                files(writePmdRuleset.flatMap { it.rulesetFile })
             }
     }
 }
