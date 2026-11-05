@@ -505,6 +505,8 @@ class NvaPluginsFunctionalTest : GradleFunctionalTest() {
                     val nva = project.extensions.getByType(no.unit.nva.gradle.NvaConventionsExtension::class.java)
                     println("spotlessEnabled=${nva.spotless.enabled.get()}")
                     println("pmdIgnoreFailures=${nva.pmd.ignoreFailures.get()}")
+                    println("pmdAnalyzeTests=${nva.pmd.analyzeTests.get()}")
+                    println("pmdExcludedRules=${nva.pmd.excludedRules.get()}")
                 }
             }
             """.trimIndent(),
@@ -514,5 +516,7 @@ class NvaPluginsFunctionalTest : GradleFunctionalTest() {
 
         assertTrue(result.output.contains("spotlessEnabled=true"))
         assertTrue(result.output.contains("pmdIgnoreFailures=false"))
+        assertTrue(result.output.contains("pmdAnalyzeTests=true"))
+        assertTrue(result.output.contains("pmdExcludedRules=[]"))
     }
 }

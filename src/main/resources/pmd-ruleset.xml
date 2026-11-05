@@ -28,6 +28,7 @@
     <exclude name="ShortClassName"/>
     <exclude name="OnlyOneReturn"/>
     <exclude name="LocalVariableCouldBeFinal"/>
+    <exclude name="LocalVariableDeclarationShouldBeAtStartOfBlock"/>
     <exclude name="MethodArgumentCouldBeFinal"/>
     <exclude name="UseExplicitTypes"/>
     <exclude name="UnnecessaryConstructor"/>
@@ -39,9 +40,8 @@
     <exclude name="LawOfDemeter"/>
     <exclude name="DataClass"/>
     <exclude name="ExcessiveImports"/>
-    <exclude name="AvoidCatchingGenericException"/>
     <exclude name="SignatureDeclareThrowsException"/>
-    <exclude name="UseUtilityClass"/>
+    <exclude name="InstantiableUtilityClass"/>
     <exclude name="UseObjectForClearerAPI"/>
     <exclude name="TooManyMethods"/>
   </rule>
