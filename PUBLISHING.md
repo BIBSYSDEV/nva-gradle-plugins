@@ -13,7 +13,8 @@
 6. Optional: Edit the generated release notes on GitHub
 
 If you use [mise](https://mise.jdx.dev), `mise run publish:release` does step 3 for you.
-It asks for confirmation, then creates the release for the `version` in `build.gradle.kts` on main.
+It shows the latest release and the `version` in `build.gradle.kts` on main, then creates the release for that version once you confirm.
+`mise run publish:versions` shows the same two versions on its own.
 
 ## Testing locally
 
