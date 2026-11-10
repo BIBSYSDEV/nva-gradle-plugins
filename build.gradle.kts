@@ -15,6 +15,11 @@ plugins {
 group = "com.github.bibsysdev"
 version = "1.0.14"
 
+// -PlocalBuild keeps publishToMavenLocal from reusing a version that is already on Maven Central
+if (providers.gradleProperty("localBuild").isPresent) {
+    version = "$version-local"
+}
+
 repositories {
     gradlePluginPortal()
     mavenCentral()
@@ -182,6 +187,13 @@ publishing {
 tasks.withType<PublishToMavenRepository>().configureEach {
     if (name.contains("PluginMarkerMaven") && name.contains("SonatypeRepository")) {
         enabled = false
+    }
+}
+
+tasks.named("publishToMavenLocal") {
+    val publishedCoordinate = "${project.group}:${project.name}:${project.version}"
+    doLast {
+        println("Published $publishedCoordinate to the local Maven repository")
     }
 }
 
