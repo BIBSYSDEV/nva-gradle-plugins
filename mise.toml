@@ -7,24 +7,33 @@ description = "Create a GitHub release for the version on main, which triggers p
 depends = ["publish:versions"]
 confirm = "Release the version on main to Maven Central?"
 run = '''
-version_on_main="$(mise run --quiet publish:version-on-main)"
-if [ -z "$version_on_main" ]; then
-  echo "Could not read version from build.gradle.kts on main"
-  exit 1
-fi
+version_on_main="$(mise run --quiet publish:version-on-main)" || exit 1
 gh release create "v${version_on_main}" --title "v${version_on_main}" --generate-notes --target main
 '''
 
 [tasks."publish:versions"]
 description = "Show the latest GitHub release and the version in build.gradle.kts on main"
-env = { GH_PAGER = "cat" }
 run = '''
-echo "Latest release:  $(gh release view --json tagName --jq .tagName)"
-echo "Version on main: v$(mise run --quiet publish:version-on-main)"
+latest_release="$(gh release view --json tagName --jq .tagName)" || {
+  echo "Could not read the latest release from GitHub. Check that gh is installed and logged in (gh auth status)." >&2
+  exit 1
+}
+version_on_main="$(mise run --quiet publish:version-on-main)" || exit 1
+echo "Latest release:  ${latest_release}"
+echo "Version on main: v${version_on_main}"
 '''
 
 [tasks."publish:version-on-main"]
 hide = true
 run = '''
-gh api 'repos/{owner}/{repo}/contents/build.gradle.kts?ref=main' -H 'Accept: application/vnd.github.raw' | sed -n 's/^version = "\(.*\)"$/\1/p'
+build_file_on_main="$(gh api 'repos/{owner}/{repo}/contents/build.gradle.kts?ref=main' -H 'Accept: application/vnd.github.raw')" || {
+  echo "Could not fetch build.gradle.kts on main from GitHub. Check that gh is installed and logged in (gh auth status)." >&2
+  exit 1
+}
+version_on_main="$(printf '%s\n' "$build_file_on_main" | sed -n 's/^version *= *"\([^"]*\)".*/\1/p')"
+if [ -z "$version_on_main" ]; then
+  echo 'Found no top-level line of the form version = "x.y.z" in build.gradle.kts on main.' >&2
+  exit 1
+fi
+echo "$version_on_main"
 '''

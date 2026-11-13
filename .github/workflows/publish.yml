@@ -18,7 +18,7 @@ jobs:
         env:
           TAG_NAME: ${{ github.event.release.tag_name }}
         run: |
-          projectVersion="$(sed -n 's/^version = "\(.*\)"$/\1/p' build.gradle.kts)"
+          projectVersion="$(sed -n 's/^version *= *"\([^"]*\)".*/\1/p' build.gradle.kts)"
           if [ "$TAG_NAME" != "v$projectVersion" ]; then
             echo "Release tag '$TAG_NAME' does not match project version 'v$projectVersion' in build.gradle.kts"
             exit 1
