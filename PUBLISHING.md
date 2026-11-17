@@ -8,7 +8,9 @@
    ```bash
    gh release create v1.0.1 --title v1.0.1 --generate-notes --target main
    ```
-4. The `publish.yml` workflow checks that the tag matches `version`, then builds, tests, signs, and publishes to Maven Central automatically
+4. The `publish.yml` workflow checks that the tag matches `version`, then builds and tests in one job.
+   When that passes, a separate job signs and publishes to Maven Central.
+   Only the second job has access to the secrets, and it runs no tests or formatters.
 5. Artifacts appear on Maven Central within ~10-30 minutes
 6. Optional: Edit the generated release notes on GitHub
 
