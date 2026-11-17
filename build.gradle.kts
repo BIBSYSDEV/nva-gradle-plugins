@@ -13,7 +13,7 @@ plugins {
 }
 
 group = "com.github.bibsysdev"
-version = "1.0.14"
+version = "1.0.15"
 
 // -PlocalBuild keeps publishToMavenLocal from reusing a version that is already on Maven Central
 if (providers.gradleProperty("localBuild").isPresent) {
