@@ -49,7 +49,11 @@ jobs:
           distribution: corretto
           java-version: "21"
 
+      # No Gradle cache here: the cache is written by CI runs on main, and this job must not build the
+      # release on top of state that other jobs could have changed.
       - uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # v5.0.2
+        with:
+          cache-disabled: true
 
       - name: Publish to Maven Central
         run: ./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository
