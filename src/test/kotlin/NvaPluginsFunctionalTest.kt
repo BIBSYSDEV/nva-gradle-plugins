@@ -226,6 +226,26 @@ class NvaPluginsFunctionalTest : GradleFunctionalTest() {
     }
 
     @Test
+    fun formattingConventionsOnlyAddsFinalNewlineToMarkdownAndYaml() {
+        kotlinBuildFile(
+            """
+            plugins {
+                id("nva.formatting-conventions")
+            }
+            """.trimIndent(),
+        )
+        val markdownWithoutFinalNewline = "*   item\n\n| a | b |\n|---|---|"
+        val yamlWithoutFinalNewline = "key:    value\nlist: [ 1,2 ]"
+        writeProjectFile("README.md", markdownWithoutFinalNewline)
+        writeProjectFile("config.yaml", yamlWithoutFinalNewline)
+
+        runner("spotlessApply").build()
+
+        assertEquals("$markdownWithoutFinalNewline\n", File(projectDir, "README.md").readText())
+        assertEquals("$yamlWithoutFinalNewline\n", File(projectDir, "config.yaml").readText())
+    }
+
+    @Test
     fun formattingConventionsSerializesSpotlessTasksToAvoidLintsDirectoryRace() {
         kotlinBuildFile(
             """
