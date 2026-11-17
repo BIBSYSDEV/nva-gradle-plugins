@@ -24,14 +24,12 @@ spotless {
     format("markdown") {
         target("**/*.md")
         targetExclude("**/build/**")
-        prettier().config(mapOf("proseWrap" to "preserve"))
         endWithNewline()
     }
 
     format("yaml") {
         target("**/*.yaml", "**/*.yml")
         targetExclude("**/build/**")
-        prettier().config(mapOf("printWidth" to 120))
         endWithNewline()
     }
 

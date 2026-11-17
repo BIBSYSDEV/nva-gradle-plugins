@@ -87,12 +87,10 @@ spotless {
     }
     format("markdown") {
         target("**/*.md")
-        prettier().config(mapOf("proseWrap" to "preserve"))
         endWithNewline()
     }
     format("yaml") {
         target("**/*.yaml", "**/*.yml")
-        prettier().config(mapOf("printWidth" to 120))
         endWithNewline()
     }
     format("misc") {
