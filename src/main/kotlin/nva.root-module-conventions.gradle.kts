@@ -80,6 +80,8 @@ tasks.named<DependencyUpdatesTask>("dependencyUpdates") {
     outputDir = "build/dependencyUpdates"
     reportfileName = "report"
     gradleReleaseChannel = "current"
+    // Otherwise a `strictly` version in a catalog hides every newer release from the report
+    rejectOutOfBounds = false
     rejectVersionIf {
         (isNonStable(candidate.version) && !isNonStable(currentVersion)) ||
             VersionCooldown.isWithinCooldown(candidate.group, candidate.module, candidate.version)

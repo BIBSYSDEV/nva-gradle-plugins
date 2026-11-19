@@ -318,6 +318,32 @@ class NvaPluginsFunctionalTest : GradleFunctionalTest() {
     }
 
     @Test
+    fun dependencyUpdatesReportsUpgradesPastStrictCatalogVersions() {
+        writeProjectFile(
+            "gradle/libs.versions.toml",
+            """
+            [versions]
+            junit4 = { strictly = "4.12" }
+
+            [libraries]
+            junit4 = { module = "junit:junit", version.ref = "junit4" }
+            """.trimIndent(),
+        )
+        rootWithSubmoduleBuildFiles(
+            submoduleExtraConfig =
+                """
+                dependencies {
+                    implementation(libs.junit4)
+                }
+                """.trimIndent(),
+        )
+
+        val result = runner("dependencyUpdates", "--no-parallel").build()
+
+        assertContains(result.output, "junit:junit [4.12 -> ")
+    }
+
+    @Test
     fun errorProneDetectsDeadException() {
         javaConventionsBuildFile(
             """

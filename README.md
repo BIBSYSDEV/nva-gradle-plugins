@@ -90,6 +90,9 @@ This is intentional, so developers never have to run formatting manually.
 Markdown and YAML files only get a final newline; they are not reformatted, so no build step installs or runs npm packages for formatting.
 Set `nva.spotless.enabled = false` to opt out entirely.
 
+The `dependencyUpdates` report hides releases younger than seven days, and pre-releases unless the current version is one.
+It still reports upgrades for versions pinned with `strictly` in a version catalog, so a strict pin does not hide new releases.
+
 ## Configuration
 
 All plugins read from the shared `nva {}` extension:
