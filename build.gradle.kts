@@ -1,4 +1,5 @@
 import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
+import no.unit.nva.gradle.VersionCooldown
 import java.util.Properties
 
 plugins {
@@ -82,7 +83,7 @@ spotless {
         ktlint()
     }
     kotlinGradle {
-        target("*.gradle.kts", "src/**/*.gradle.kts")
+        target("*.gradle.kts", "buildSrc/*.gradle.kts", "src/**/*.gradle.kts")
         ktlint()
     }
     format("markdown") {
@@ -137,7 +138,8 @@ tasks.named<DependencyUpdatesTask>("dependencyUpdates") {
     reportfileName = "report"
     gradleReleaseChannel = "current"
     rejectVersionIf {
-        isNonStable(candidate.version) && !isNonStable(currentVersion)
+        (isNonStable(candidate.version) && !isNonStable(currentVersion)) ||
+            VersionCooldown.isWithinCooldown(candidate.group, candidate.module, candidate.version)
     }
 }
 
